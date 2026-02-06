@@ -1,0 +1,10 @@
+{
+  "project": {
+    "include": ["src/**/*"]
+  },
+  "rules": {
+    "circular-dependencies": {
+      "severity": "error"
+    }
+  }
+}

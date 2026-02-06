@@ -36,6 +36,18 @@ export const ConfigSchema = z.object({
       classes: z.string().default('PascalCase'),
       overrides: z.record(NamingOverrideSchema).optional(),
     }).optional(),
+    'complexity': z.object({
+      severity: z.enum(['error', 'warn']).default('warn'),
+      cyclomatic: z.number().default(10),
+      cognitive: z.number().default(15),
+      overrides: z.record(z.object({
+        cyclomatic: z.number().optional(),
+        cognitive: z.number().optional(),
+      })).optional(),
+    }).optional(),
+    'circular-dependencies': z.object({
+      severity: z.enum(['error', 'warn']).default('error'),
+    }).optional(),
   }).default({}),
   output: z.object({
     format: z.enum(['json', 'markdown', 'stylish']).default('stylish'),

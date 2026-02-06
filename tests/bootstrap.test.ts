@@ -51,4 +51,41 @@ describe('createRunner', () => {
     const runner = createRunner(config);
     expect(runner).toBeDefined();
   });
+
+  it('creates a runner with complexity rule enabled', () => {
+    const config = ConfigSchema.parse({
+      rules: {
+        'complexity': { severity: 'warn', cyclomatic: 10, cognitive: 15 },
+      },
+    });
+
+    const runner = createRunner(config);
+    expect(runner).toBeDefined();
+  });
+
+  it('creates a runner with circular-dependencies rule enabled', () => {
+    const config = ConfigSchema.parse({
+      rules: {
+        'circular-dependencies': { severity: 'error' },
+      },
+    });
+
+    const runner = createRunner(config);
+    expect(runner).toBeDefined();
+  });
+
+  it('creates a runner with all rules enabled', () => {
+    const config = ConfigSchema.parse({
+      rules: {
+        'line-limits': { severity: 'warn' },
+        'naming-convention': { severity: 'warn' },
+        'dead-code': { severity: 'error' },
+        'complexity': { severity: 'warn' },
+        'circular-dependencies': { severity: 'error' },
+      },
+    });
+
+    const runner = createRunner(config);
+    expect(runner).toBeDefined();
+  });
 });

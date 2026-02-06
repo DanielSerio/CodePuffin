@@ -1,0 +1,12 @@
+{
+  "project": {
+    "include": ["src/**/*"]
+  },
+  "rules": {
+    "complexity": {
+      "severity": "warn",
+      "cyclomatic": 3,
+      "cognitive": 3
+    }
+  }
+}

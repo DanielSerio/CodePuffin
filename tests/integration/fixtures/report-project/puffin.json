@@ -1,0 +1,15 @@
+{
+  "project": {
+    "include": ["src/**/*"]
+  },
+  "rules": {
+    "line-limits": {
+      "severity": "warn",
+      "default": 5
+    }
+  },
+  "output": {
+    "format": "json",
+    "reportFile": "reports/scan-[timestamp].json"
+  }
+}

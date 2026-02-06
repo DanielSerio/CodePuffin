@@ -85,4 +85,94 @@ describe('ConfigSchema', () => {
     const result = ConfigSchema.safeParse(config);
     expect(result.success).toBe(false);
   });
+
+  it('accepts complexity rule with defaults', () => {
+    const config = {
+      rules: {
+        'complexity': {},
+      },
+    };
+
+    const result = ConfigSchema.safeParse(config);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.rules['complexity']?.severity).toBe('warn');
+      expect(result.data.rules['complexity']?.cyclomatic).toBe(10);
+      expect(result.data.rules['complexity']?.cognitive).toBe(15);
+    }
+  });
+
+  it('accepts complexity rule with custom thresholds', () => {
+    const config = {
+      rules: {
+        'complexity': {
+          severity: 'error',
+          cyclomatic: 20,
+          cognitive: 30,
+        },
+      },
+    };
+
+    const result = ConfigSchema.safeParse(config);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.rules['complexity']?.cyclomatic).toBe(20);
+      expect(result.data.rules['complexity']?.cognitive).toBe(30);
+    }
+  });
+
+  it('accepts complexity rule with module overrides', () => {
+    const config = {
+      rules: {
+        'complexity': {
+          overrides: {
+            '@utils': { cyclomatic: 5 },
+            '@legacy': { cyclomatic: 25, cognitive: 40 },
+          },
+        },
+      },
+    };
+
+    const result = ConfigSchema.safeParse(config);
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects complexity rule with invalid severity', () => {
+    const config = {
+      rules: {
+        'complexity': { severity: 'fatal' },
+      },
+    };
+
+    const result = ConfigSchema.safeParse(config);
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts circular-dependencies rule with defaults', () => {
+    const config = {
+      rules: {
+        'circular-dependencies': {},
+      },
+    };
+
+    const result = ConfigSchema.safeParse(config);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.rules['circular-dependencies']?.severity).toBe('error');
+    }
+  });
+
+  it('accepts circular-dependencies rule with warn severity', () => {
+    const config = {
+      rules: {
+        'circular-dependencies': { severity: 'warn' },
+      },
+    };
+
+    const result = ConfigSchema.safeParse(config);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.rules['circular-dependencies']?.severity).toBe('warn');
+    }
+  });
 });

@@ -1,10 +1,12 @@
 import { Command } from 'commander';
 import pc from 'picocolors';
 import path from 'path';
+import { mkdirSync, writeFileSync } from 'fs';
 import { Scanner } from '../core/scanner';
 import { RuleResult } from '../core/rules';
-import { reportStylish } from '../core/reporter';
+import { reportStylish, reportJson, reportMarkdown } from '../core/reporter';
 import { loadConfig, createRunner } from '../core/bootstrap';
+import { Config } from '../core/config';
 
 
 const program = new Command();
@@ -56,7 +58,11 @@ async function runScan(directory: string, options: ScanOptions) {
   const runner = createRunner(validatedConfig);
   const results = await runner.run(context);
 
+  // Always print stylish output to the console
   reportStylish(results, context.root);
+
+  // Write report file if configured
+  writeReportFile(validatedConfig, results, context.root);
 
   if (results.some((r: RuleResult) => r.severity === 'error')) {
     console.log(pc.red('\n✖ Scan failed due to errors.'));
@@ -64,6 +70,28 @@ async function runScan(directory: string, options: ScanOptions) {
   }
 
   console.log(pc.green('\n✨ Scan complete!'));
+}
+
+// Writes a report file based on the configured output format and reportFile path
+function writeReportFile(config: Config, results: RuleResult[], root: string) {
+  if (!config.output.reportFile) return;
+
+  const format = config.output.format;
+
+  // Pick the formatter; stylish falls back to JSON for file output
+  const formatter = format === 'markdown' ? reportMarkdown : reportJson;
+  const content = formatter(results, root);
+
+  // Replace [timestamp] placeholder with a filesystem-safe ISO timestamp
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const fileName = config.output.reportFile.replace('[timestamp]', timestamp);
+  const filePath = path.resolve(root, fileName);
+
+  // Ensure the directory exists
+  mkdirSync(path.dirname(filePath), { recursive: true });
+  writeFileSync(filePath, content, 'utf-8');
+
+  console.log(pc.green(`\n📝 Report written to ${pc.bold(fileName)}`));
 }
 
 program
