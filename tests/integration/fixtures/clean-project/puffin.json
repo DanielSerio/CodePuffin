@@ -1,0 +1,16 @@
+{
+  "project": {
+    "include": ["src/**/*"]
+  },
+  "rules": {
+    "line-limits": {
+      "severity": "warn",
+      "default": 100
+    },
+    "naming-convention": {
+      "severity": "warn",
+      "files": "kebab-case",
+      "variables": "camelCase"
+    }
+  }
+}
