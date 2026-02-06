@@ -1,0 +1,114 @@
+import ts from 'typescript';
+import { readFileSync } from 'fs';
+import { Rule, RuleResult } from '../core/rules';
+import { ScanContext } from '../core/scanner';
+
+export class DeadCodeRule implements Rule {
+  id = 'dead-code';
+
+  async run(context: ScanContext): Promise<RuleResult[]> {
+    const config = context.config.rules?.['dead-code'];
+    if (!config) return [];
+
+    const results: RuleResult[] = [];
+    const { severity, unusedExports, unusedVariables } = config;
+
+    const exportMap = new Map<string, { file: string, line: number, name: string; }>();
+    const importStats = new Set<string>();
+
+    // 1. Pass 1: Collect Exports and Imports
+    for (const filePath of context.files) {
+      try {
+        const content = readFileSync(filePath, 'utf-8');
+        const sourceFile = ts.createSourceFile(filePath, content, ts.ScriptTarget.Latest, true);
+
+        const walk = (node: ts.Node) => {
+          // Track Imports
+          if (ts.isImportDeclaration(node)) {
+            if (node.importClause) {
+              if (node.importClause.name) {
+                importStats.add(node.importClause.name.text);
+              }
+              if (node.importClause.namedBindings) {
+                if (ts.isNamedImports(node.importClause.namedBindings)) {
+                  node.importClause.namedBindings.elements.forEach(el => {
+                    importStats.add(el.name.text);
+                  });
+                }
+              }
+            }
+          }
+
+          // Track Exports
+          if (ts.isExportDeclaration(node)) {
+            // export { a, b }
+            if (node.exportClause && ts.isNamedExports(node.exportClause)) {
+              node.exportClause.elements.forEach(el => {
+                exportMap.set(`${filePath}:${el.name.text}`, {
+                  file: filePath,
+                  line: sourceFile.getLineAndCharacterOfPosition(el.getStart()).line + 1,
+                  name: el.name.text
+                });
+              });
+            }
+          }
+
+          // export function foo()
+          if (ts.canHaveModifiers(node)) {
+            const modifiers = ts.getModifiers(node);
+            const isExported = modifiers?.some(m => m.kind === ts.SyntaxKind.ExportKeyword);
+
+            if (isExported) {
+              if (ts.isFunctionDeclaration(node) && node.name) {
+                exportMap.set(`${filePath}:${node.name.text}`, {
+                  file: filePath,
+                  line: sourceFile.getLineAndCharacterOfPosition(node.name.getStart()).line + 1,
+                  name: node.name.text
+                });
+              } else if (ts.isClassDeclaration(node) && node.name) {
+                exportMap.set(`${filePath}:${node.name.text}`, {
+                  file: filePath,
+                  line: sourceFile.getLineAndCharacterOfPosition(node.name.getStart()).line + 1,
+                  name: node.name.text
+                });
+              } else if (ts.isVariableStatement(node)) {
+                node.declarationList.declarations.forEach(decl => {
+                  if (ts.isIdentifier(decl.name)) {
+                    exportMap.set(`${filePath}:${decl.name.text}`, {
+                      file: filePath,
+                      line: sourceFile.getLineAndCharacterOfPosition(decl.getStart()).line + 1,
+                      name: decl.name.text
+                    });
+                  }
+                });
+              }
+            }
+          }
+
+          ts.forEachChild(node, walk);
+        };
+
+        walk(sourceFile);
+      } catch (err) { /* ignore */ }
+    }
+
+    // 2. Pass 2: Report Unused Exports
+    if (unusedExports) {
+      exportMap.forEach((info, key) => {
+        if (!importStats.has(info.name)) {
+          // Special case: entry points like index.ts/main.ts might be "unused" by other imports but are entry points.
+          // For now, we report them all.
+          results.push({
+            ruleId: this.id,
+            file: info.file,
+            line: info.line,
+            message: `Export "${info.name}" is never imported.`,
+            severity,
+          });
+        }
+      });
+    }
+
+    return results;
+  }
+}

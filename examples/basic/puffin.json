@@ -1,0 +1,22 @@
+{
+  "project": {
+    "include": [
+      "src/**/*"
+    ]
+  },
+  "rules": {
+    "line-limits": {
+      "severity": "warn",
+      "default": 20
+    },
+    "naming-convention": {
+      "severity": "error",
+      "files": "kebab-case",
+      "variables": "camelCase"
+    },
+    "dead-code": {
+      "severity": "error",
+      "unusedExports": true
+    }
+  }
+}
