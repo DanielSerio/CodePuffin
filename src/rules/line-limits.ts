@@ -41,6 +41,7 @@ export class LineLimitsRule implements Rule {
             file: filePath,
             message: `File exceeds line limit of ${limit} (current: ${lines})`,
             severity,
+            suggestion: 'Consider refactoring this file by extracting logic into smaller components, hooks, or utility files.',
           });
         }
       } catch (err) {

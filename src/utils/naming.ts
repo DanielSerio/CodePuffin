@@ -16,3 +16,24 @@ export function checkCase(name: string, style: CaseStyle): boolean {
       return true;
   }
 }
+
+export function suggestName(name: string, style: CaseStyle): string {
+  // Simple conversion logic
+  const parts = name.split(/[-_ ]|(?=[A-Z])/).filter(p => !!p).map(p => p.toLowerCase());
+
+  switch (style) {
+    case 'kebab-case':
+      return parts.join('-');
+    case 'camelCase':
+      return parts.map((p, i) => i === 0 ? p : p.charAt(0).toUpperCase() + p.slice(1)).join('');
+    case 'PascalCase':
+      return parts.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join('');
+    case 'UPPER_SNAKE_CASE':
+      return parts.join('_').toUpperCase();
+    case 'useCamelCase':
+      const base = parts.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join('');
+      return base.startsWith('Use') ? 'u' + base.slice(1) : 'use' + base;
+    default:
+      return name;
+  }
+}

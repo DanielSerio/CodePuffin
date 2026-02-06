@@ -12,11 +12,18 @@
     "naming-convention": {
       "severity": "error",
       "files": "kebab-case",
-      "variables": "camelCase"
+      "variables": "camelCase",
+      "components": {
+        "entity": "PascalCase",
+        "filename": "PascalCase"
+      }
     },
     "dead-code": {
       "severity": "error",
       "unusedExports": true
     }
+  },
+  "output": {
+    "format": "markdown"
   }
 }

@@ -2,6 +2,7 @@ import type { Plugin } from 'vite';
 import { Scanner } from '../core/scanner';
 import type { RuleResult } from '../core/rules';
 import { loadConfig, createRunner } from '../core/bootstrap';
+import { writeReportFile } from '../core/reporter';
 import path from 'path';
 import pc from 'picocolors';
 
@@ -10,45 +11,52 @@ export interface VitePluginOptions {
 }
 
 export default function codePuffinPlugin(options: VitePluginOptions = {}): Plugin {
+  async function runScan(root: string) {
+    const configPath = path.resolve(root, options.configPath || 'puffin.json');
+
+    let loaded;
+    try {
+      loaded = loadConfig(configPath);
+    } catch (e) {
+      console.warn(pc.yellow(`[CodePuffin] Failed to parse config: ${e}`));
+      return;
+    }
+
+    if (!loaded.success) {
+      console.warn(pc.yellow(`[CodePuffin] Invalid configuration:\n${loaded.error}`));
+      return;
+    }
+
+    const config = loaded.data;
+    const scanner = new Scanner(root, config);
+    const context = await scanner.createContext();
+    const runner = createRunner(config);
+    const scanResults = await runner.run(context);
+
+    if (scanResults.length > 0) {
+      console.log(pc.blue('\n🐧 CodePuffin architectural scan results:'));
+
+      scanResults.forEach((res: RuleResult) => {
+        const relativePath = path.relative(root, res.file);
+        const location = res.line ? `${relativePath}:${res.line}` : relativePath;
+        const label = res.severity === 'error' ? pc.red('ERROR') : pc.yellow('WARN');
+        console.log(`  ${label} ${pc.bold(res.ruleId)}: ${res.message} (${location})`);
+      });
+    }
+
+    // Write report file if configured
+    writeReportFile(config, scanResults, root);
+  }
+
   return {
     name: 'vite-plugin-codepuffin',
+
     async buildStart() {
-      const root = process.cwd();
-      const configPath = path.resolve(root, options.configPath || 'puffin.json');
+      await runScan(process.cwd());
+    },
 
-      let loaded;
-      try {
-        loaded = loadConfig(configPath);
-      } catch (e) {
-        this.warn(`Failed to parse CodePuffin config: ${e}`);
-        return;
-      }
-
-      if (!loaded.success) {
-        this.warn(`Invalid CodePuffin configuration:\n${loaded.error}`);
-        return;
-      }
-
-      const scanner = new Scanner(root, loaded.data);
-      const context = await scanner.createContext();
-      const runner = createRunner(loaded.data);
-      const scanResults = await runner.run(context);
-
-      if (scanResults.length > 0) {
-        console.log(pc.blue('\n🐧 CodePuffin architectural scan results:'));
-
-        scanResults.forEach((res: RuleResult) => {
-          const relativePath = path.relative(root, res.file);
-          const location = res.line ? `${relativePath}:${res.line}` : relativePath;
-          const message = `${pc.bold(res.ruleId)}: ${res.message} (${location})`;
-
-          if (res.severity === 'error') {
-            this.error(message);
-          } else {
-            this.warn(message);
-          }
-        });
-      }
-    }
+    async handleHotUpdate({ server }) {
+      await runScan(server.config.root);
+    },
   };
 }

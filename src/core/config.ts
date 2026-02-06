@@ -6,6 +6,10 @@ const NamingOverrideSchema = z.object({
   variables: z.string().optional(),
   functions: z.string().optional(),
   classes: z.string().optional(),
+  components: z.object({
+    entity: z.string().optional(),
+    filename: z.string().optional(),
+  }).optional(),
 });
 
 export type NamingOverride = z.infer<typeof NamingOverrideSchema>;
@@ -34,6 +38,10 @@ export const ConfigSchema = z.object({
       variables: z.string().default('camelCase'),
       functions: z.string().default('camelCase'),
       classes: z.string().default('PascalCase'),
+      components: z.object({
+        entity: z.string().optional(),
+        filename: z.string().optional(),
+      }).optional(),
       overrides: z.record(NamingOverrideSchema).optional(),
     }).optional(),
     'complexity': z.object({

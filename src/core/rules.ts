@@ -8,6 +8,7 @@ export interface RuleResult {
   line?: number;
   message: string;
   severity: Severity;
+  suggestion?: string;
 }
 
 export interface Rule {

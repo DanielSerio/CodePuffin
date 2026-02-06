@@ -1,6 +1,7 @@
 import { Scanner } from '../core/scanner';
 import type { RuleResult } from '../core/rules';
 import { loadConfig, createRunner } from '../core/bootstrap';
+import { writeReportFile } from '../core/reporter';
 import path from 'path';
 import pc from 'picocolors';
 
@@ -9,7 +10,6 @@ export interface NextPluginOptions {
   enabled?: boolean;
 }
 
-// Minimal structural type for Next.js config (avoids depending on `next`)
 interface NextConfig {
   rewrites?: () => Promise<unknown>;
   [key: string]: unknown;
@@ -34,9 +34,10 @@ export default function withCodePuffin(nextConfig: NextConfig = {}, options: Nex
         }
 
         if (loaded?.success) {
-          const scanner = new Scanner(root, loaded.data);
+          const config = loaded.data;
+          const scanner = new Scanner(root, config);
           const context = await scanner.createContext();
-          const runner = createRunner(loaded.data);
+          const runner = createRunner(config);
           const scanResults = await runner.run(context);
 
           if (scanResults.length > 0) {
@@ -48,6 +49,9 @@ export default function withCodePuffin(nextConfig: NextConfig = {}, options: Nex
             });
             console.log('');
           }
+
+          // Write report file if configured
+          writeReportFile(config, scanResults, root);
         }
       }
 

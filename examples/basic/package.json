@@ -2,6 +2,6 @@
   "name": "example-basic",
   "private": true,
   "scripts": {
-    "scan": "node ../../dist/index.js scan"
+    "dev": "node ../../dist/index.js scan"
   }
 }

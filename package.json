@@ -14,7 +14,10 @@
     "start": "node dist/index.js",
     "test": "pnpm test:unit && pnpm test:integration",
     "test:unit": "vitest run",
-    "test:integration": "pnpm build && playwright test"
+    "test:integration": "pnpm build && playwright test",
+    "dev:basic": "cd examples/basic && pnpm dev",
+    "dev:react": "cd examples/react-app && pnpm dev",
+    "dev:nextjs": "cd examples/nextjs-app && pnpm dev"
   },
   "keywords": [],
   "author": "DanielSerio",

@@ -5,10 +5,21 @@
     ]
   },
   "rules": {
+    "line-limits": {
+      "severity": "warn",
+      "default": 100
+    },
     "naming-convention": {
       "severity": "warn",
       "files": "kebab-case",
-      "variables": "camelCase"
+      "variables": "camelCase",
+      "components": {
+        "entity": "PascalCase",
+        "filename": "PascalCase"
+      }
     }
+  },
+  "output": {
+    "format": "markdown"
   }
 }

@@ -1,24 +1,31 @@
 # CodePuffin 🐧
 
-**CodePuffin** is a lightweight, high-performance static analysis tool designed to enforce architectural integrity and code quality without the overhead of AI or external API dependencies.
+> **The Architectural Integrity Engine for the Agentic Era.**
 
-- **✅ Deterministic**: Consistent, reproducible results every time. No hallucinations, no tokens, no cost.
+## What is CodePuffin?
 
-Unlike traditional linters or AI-driven assistants, CodePuffin focuses on **Architectural Enforcement**—ensuring that your project's modular boundaries, naming conventions, and complexity limits are strictly maintained across the entire codebase.
+**CodePuffin** is a high-performance static analysis engine designed to bridge the gap between human architectural vision and AI-driven code generation. While AI agents are domesticating the world of coding, CodePuffin ensures they stay within the boundaries of your design.
 
-### Why CodePuffin?
+By leveraging the **TypeScript Compiler API**, CodePuffin provides deep, deterministic, and near-instant feedback on your project's modular health without the overhead of external APIs or "black-box" LLM analysis.
 
-- **🚀 Blazing Fast**: Built on the TypeScript Compiler API for deep AST analysis with near-instant execution.
-- **🔒 Privacy First**: Performs 100% local static analysis. Your code never leaves your machine.
-- **🏗️ Architecturally Aware**: Groups rules by project modules (UI, Hooks, Data Layer) to enforce different standards for different layers.
-- **✅ Deterministic**: Consistent, reproducible results every time. No hallucinations, no tokens, no cost.
+### 🌟 Why CodePuffin?
 
-### Core Capabilities
+- **🤖 Agent-Optimized**: Generates markdown reports specifically structured as "missions" for AI coding assistants, enabling autonomous refactoring pipelines.
+- **🚀 Blazing Fast**: Near-instant AST analysis. It's not just a linter; it's a real-time architectural guardrail that runs at the speed of thought.
+- **🔒 Privacy-First by Design**: 100% local. Your intellectual property never leaves your machine, making it the secure choice for high-stakes enterprise projects.
+- **🏗️ Architecturally Aware**: Move beyond simple linting. Enforce modular boundaries and layer-specific standards (UI vs. Data Layer) that traditional tools ignore.
+- **✅ Zero-Cost Determinism**: No tokens, no hallucinations, no subscriptions. Just pure, reproducible logic that ensures your codebase remains a masterpiece.
 
-- **Dead Code Detection**: Identify unused exports and variables across complex module trees.
-- **Architectural Guardrails**: Enforce naming conventions and file structures specific to your project's layers.
-- **Complexity Management**: Monitor line limits and cognitive complexity to prevent technical debt.
-- **Ecosystem Ready**: Seamlessly integrates into your build pipeline via CLI or framework-specific plugins.
+### 🔮 Built for 2026 and Beyond
+
+In a world where code is increasingly machine-generated, **architectural drift** is the new technical debt. CodePuffin is the "source of truth" that empowers human architects to lead teams of AI agents with confidence, ensuring that every file adheres to the core principles of SOLID and clean design.
+
+### 🛠️ Core Capabilities
+
+- **Zero-Waste Analysis**: Deep dead-code detection that identifies unused exports and variables across complex module trees.
+- **Structural Integrity**: Custom naming conventions and file structures tailored to your project's specific layers.
+- **Cognitive Guardrails**: Advanced complexity monitoring (Cyclomatic & Cognitive) to keep your logic human-readable and agent-maintainable.
+- **Enterprise Integration**: First-class support for Vite, Next.js, and CLI-driven CI/CD pipelines.
 
 ## interface
 
@@ -137,29 +144,24 @@ CodePuffin uses a configuration file (`puffin.json`) to determine which rules to
 - **Testing**: Vitest (Unit) & Playwright (Integration)
 - **Core Library**: TypeScript Compiler API
 
-## Roadmap
+## Features
 
-### Phase 1: Foundation
+### 📏 Rules
 
-- [x] Initialize PNPM workspace and project structure
-- [x] Implement CLI boilerplate (Commander.js)
-- [x] Basic configuration loader (`puffin.json`)
-- [x] File system traversal with `@module` alias support
+- **Modular Line Limits**: Enforce strict file length boundaries with per-module overrides (e.g., higher limits for `@constants`).
+- **Deep Dead Code**: Trace export chains to find truly unused code that standard linters miss.
+- **Naming Enforcement**: Precision case-style control for files, variables, functions, and classes.
+- **Logic Complexity**: Quantitative metrics for cyclomatic and cognitive complexity with smart thresholds.
+- **Circular Insight**: Graph-based analysis to detect and visualize import cycles.
 
-### Phase 2: Core Rules
+### 📊 Reporting Ecosystem
 
-- [x] **Line Limits**: Support for default and override limits
-- [x] **Dead Code**: Identify unused variables and exports
-- [x] **Naming Conventions**: Enforce case styles for variables, functions, and classes
+- **Stylish Console**: Real-time, color-coded terminal feedback for local development.
+- **Actionable JSON**: Structured data for integration into custom dashboarding or security tools.
+- **Agent-Ready Markdown**: High-fidelity reports designed to be fed back into AI coding agents for immediate resolution.
 
-### Phase 3: Ecosystem
+### Integrations
 
-- [x] Vite Plugin implementation
-- [x] Next.js integration
-- [x] GitHub Action for PR scanning
-
-### Phase 4: Advanced Analysis
-
-- [ ] **Complexity**: Calculate cyclomatic and cognitive complexity
-- [ ] **Circular Dependencies**: Detect imports that loop back
-- [ ] **Reporting**: Export results to Markdown and JSON
+- **CLI**: Standalone scanning via `puffin scan`
+- **Vite Plugin**: Runs on build and dev server reload
+- **Next.js Plugin**: Runs during development and CI

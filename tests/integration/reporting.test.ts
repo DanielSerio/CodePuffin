@@ -57,15 +57,15 @@ test('writes a JSON report file with timestamp in filename', () => {
   expect(firstResult.file).not.toMatch(/^\//);
 });
 
-test('writes a Markdown report when format is markdown', () => {
-  // Create a temporary config with markdown format
+test('writes a Markdown report with a stable filename (no timestamp)', () => {
+  // Markdown reports should overwrite the same file every time, ignoring [timestamp]
   const mdFixtureDir = fixtureDir;
   const mdConfigPath = path.join(mdFixtureDir, 'puffin-md.json');
   const { writeFileSync } = require('fs');
   writeFileSync(mdConfigPath, JSON.stringify({
     project: { include: ['src/**/*'] },
     rules: { 'line-limits': { severity: 'warn', default: 5 } },
-    output: { format: 'markdown', reportFile: 'reports/scan.md' },
+    output: { format: 'markdown', reportFile: 'reports/scan-[timestamp].md' },
   }));
 
   try {
@@ -78,7 +78,11 @@ test('writes a Markdown report when format is markdown', () => {
     const output = result.stdout + result.stderr;
     expect(output).toContain('Report written to');
 
-    const reportContent = readFileSync(path.join(reportsDir, 'scan.md'), 'utf-8');
+    // Filename should still contain the literal [timestamp] placeholder, not a resolved timestamp
+    const files = readdirSync(reportsDir);
+    expect(files).toContain('scan-[timestamp].md');
+
+    const reportContent = readFileSync(path.join(reportsDir, 'scan-[timestamp].md'), 'utf-8');
     expect(reportContent).toContain('# CodePuffin Scan Report');
     expect(reportContent).toContain('**Total issues:**');
     expect(reportContent).toContain('line-limits');
