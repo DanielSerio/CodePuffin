@@ -83,8 +83,8 @@ test('writes a Markdown report with a stable filename (no timestamp)', () => {
     expect(files).toContain('scan-[timestamp].md');
 
     const reportContent = readFileSync(path.join(reportsDir, 'scan-[timestamp].md'), 'utf-8');
-    expect(reportContent).toContain('# CodePuffin Scan Report');
-    expect(reportContent).toContain('**Total issues:**');
+    expect(reportContent).toContain('# 🐧 CodePuffin Scan Report');
+    expect(reportContent).toContain('**Total Issues**:');
     expect(reportContent).toContain('line-limits');
   } finally {
     // Clean up temp config

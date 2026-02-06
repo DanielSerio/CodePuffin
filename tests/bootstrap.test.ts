@@ -89,3 +89,53 @@ describe('createRunner', () => {
     expect(runner).toBeDefined();
   });
 });
+
+describe('loadConfig error handling', () => {
+  it('throws on malformed JSON in config file', () => {
+    const configPath = path.resolve(__dirname, 'integration/fixtures/malformed-config-project/puffin.json');
+    expect(() => loadConfig(configPath)).toThrow();
+  });
+
+  it('returns failure for config that fails schema validation', () => {
+    // Create a temp file with invalid schema content
+    const fs = require('fs');
+    const os = require('os');
+    const tempDir = os.tmpdir();
+    const tempConfig = path.join(tempDir, 'invalid-schema-puffin.json');
+
+    fs.writeFileSync(tempConfig, JSON.stringify({
+      rules: {
+        'line-limits': { severity: 'invalid-severity' },
+      },
+    }));
+
+    try {
+      const result = loadConfig(tempConfig);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toContain('severity');
+      }
+    } finally {
+      fs.unlinkSync(tempConfig);
+    }
+  });
+
+  it('returns defaults for empty config file', () => {
+    const fs = require('fs');
+    const os = require('os');
+    const tempDir = os.tmpdir();
+    const tempConfig = path.join(tempDir, 'empty-puffin.json');
+
+    fs.writeFileSync(tempConfig, '{}');
+
+    try {
+      const result = loadConfig(tempConfig);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.project.include).toEqual(['src/**/*']);
+      }
+    } finally {
+      fs.unlinkSync(tempConfig);
+    }
+  });
+});

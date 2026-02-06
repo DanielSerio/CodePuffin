@@ -175,4 +175,104 @@ describe('ConfigSchema', () => {
       expect(result.data.rules['circular-dependencies']?.severity).toBe('warn');
     }
   });
+
+  // Error handling tests
+  describe('error handling', () => {
+    it('rejects config with wrong type for project.include', () => {
+      const config = {
+        project: {
+          include: 'src/**/*', // should be array
+        },
+      };
+
+      const result = ConfigSchema.safeParse(config);
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects config with wrong type for project.exclude', () => {
+      const config = {
+        project: {
+          exclude: 'node_modules', // should be array
+        },
+      };
+
+      const result = ConfigSchema.safeParse(config);
+      expect(result.success).toBe(false);
+    });
+
+    it('accepts any string for naming-convention case styles (validated at runtime)', () => {
+      const config = {
+        rules: {
+          'naming-convention': {
+            files: 'custom-style',
+          },
+        },
+      };
+
+      // Schema accepts any string; actual style validation happens at runtime
+      const result = ConfigSchema.safeParse(config);
+      expect(result.success).toBe(true);
+    });
+
+    it('accepts any number for line limit (no min/max constraint in schema)', () => {
+      const config = {
+        rules: {
+          'line-limits': {
+            default: -10,
+          },
+        },
+      };
+
+      // Schema accepts any number
+      const result = ConfigSchema.safeParse(config);
+      expect(result.success).toBe(true);
+    });
+
+    it('accepts float for complexity threshold', () => {
+      const config = {
+        rules: {
+          complexity: {
+            cyclomatic: 10.5,
+          },
+        },
+      };
+
+      // Schema uses z.number() which accepts floats
+      const result = ConfigSchema.safeParse(config);
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects string where number is expected', () => {
+      const config = {
+        rules: {
+          'line-limits': {
+            default: 'one hundred',
+          },
+        },
+      };
+
+      const result = ConfigSchema.safeParse(config);
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects config with null rules object', () => {
+      const config = {
+        rules: null,
+      };
+
+      const result = ConfigSchema.safeParse(config);
+      expect(result.success).toBe(false);
+    });
+
+    it('accepts config with extra unknown properties (passthrough)', () => {
+      const config = {
+        unknownProperty: 'value',
+        rules: {},
+      };
+
+      const result = ConfigSchema.safeParse(config);
+      // Zod strict mode would fail, but default should pass or strip
+      expect(result.success).toBe(true);
+    });
+  });
 });

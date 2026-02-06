@@ -247,3 +247,253 @@ When adding a new rule to CodePuffin, the following tests should be written:
 - [ ] **Integration fixture** with an example file that triggers the rule
 - [ ] **CLI integration test** verifying the rule appears in output
 - [ ] **Verify** the rule is wired up correctly in `createRunner()` (bootstrap test)
+
+---
+
+## Roadmap: Production-Ready Test Suite
+
+This roadmap outlines a phased approach to achieving comprehensive test coverage for a
+production-quality, open-source release.
+
+### Phase 1: Error Handling & Resilience (Critical)
+
+**Goal:** Ensure the tool handles failures gracefully without crashing.
+
+#### Unit Tests
+
+| File | Tests to Add |
+|------|--------------|
+| `error-handling.test.ts` | File read errors (permission denied, file not found, deleted during scan) |
+| `config.test.ts` | Malformed JSON, missing required fields, schema coercion failures |
+| `bootstrap.test.ts` | Config file with syntax errors, read permission errors |
+
+#### Integration Tests
+
+| File | Scenarios |
+|------|-----------|
+| `cli-errors.test.ts` | `--help` output, `--version` output, invalid directory argument, missing config with `--config`, malformed config file |
+| `error-recovery.test.ts` | Project with one unparseable file (should skip, not crash), permission denied on single file |
+
+#### Fixtures
+
+```
+tests/integration/fixtures/
+├── error-project/
+│   ├── puffin.json
+│   ├── src/
+│   │   ├── valid.ts          # Valid file
+│   │   └── unparseable.ts    # Syntax error: `export const =`
+├── malformed-config-project/
+│   └── puffin.json           # Invalid JSON: `{ "rules": }`
+```
+
+---
+
+### Phase 2: Edge Cases & Boundary Conditions (High Priority)
+
+**Goal:** Handle unusual but valid inputs correctly.
+
+#### Unit Tests
+
+| File | Tests to Add |
+|------|--------------|
+| `naming.test.ts` | Empty strings, numeric-only names, single chars, `suggestName()`, `usePascalCase` style |
+| `complexity.test.ts` | Async/await, optional chaining `?.`, nested functions, arrow function bodies, getters/setters |
+| `circular-dependencies.test.ts` | Dynamic imports `import()`, re-exports `export * from`, barrel files (index.ts), self-imports |
+| `line-limits.test.ts` | CRLF vs LF counting, empty files (0 vs 1 line), BOM handling |
+| `dead-code.test.ts` | `export type`, `export * from`, side-effect imports, namespace exports |
+| `reporter.test.ts` | Pipe chars in markdown, very long messages, 1000+ results, special chars in paths |
+
+#### Integration Tests
+
+| File | Scenarios |
+|------|-----------|
+| `edge-cases.test.ts` | Paths with spaces, unicode filenames, very long paths (260+ chars), special chars in messages |
+| `module-overrides.test.ts` | Named modules with different thresholds, invalid module references, overlapping modules |
+
+#### Fixtures
+
+```
+tests/integration/fixtures/
+├── unicode-project/
+│   ├── puffin.json
+│   └── src/
+│       └── компонент.ts      # Unicode filename
+├── spaces-project/
+│   ├── puffin.json
+│   └── src/
+│       └── my component.ts   # Space in filename
+├── module-override-project/
+│   ├── puffin.json           # @components: { maxLines: 200 }
+│   └── src/
+│       ├── components/       # Should use override
+│       └── utils/            # Should use default
+```
+
+---
+
+### Phase 3: Advanced Rule Scenarios (High Priority)
+
+**Goal:** Cover complex real-world code patterns.
+
+#### Integration Tests
+
+| File | Scenarios |
+|------|-----------|
+| `multi-cycle.test.ts` | 3+ independent cycles, large cycle chains (5+ files), cycles through barrel exports |
+| `barrel-exports.test.ts` | Re-export chains, `export * from` patterns, index.ts aggregation |
+| `dead-code-advanced.test.ts` | Type-only exports, conditional exports, tree-shaking scenarios |
+| `mixed-severity.test.ts` | Project with both `error` and `warn` violations (exit code should be 1) |
+
+#### Fixtures
+
+```
+tests/integration/fixtures/
+├── multi-cycle-project/
+│   ├── puffin.json
+│   └── src/
+│       ├── a.ts → b.ts → a.ts       # Cycle 1
+│       ├── x.ts → y.ts → z.ts → x.ts # Cycle 2
+├── barrel-exports-project/
+│   ├── puffin.json
+│   └── src/
+│       ├── components/
+│       │   ├── index.ts              # export * from './Button'
+│       │   └── Button.ts
+│       └── app.ts                    # imports from './components'
+├── dead-code-edge-project/
+│   ├── puffin.json
+│   └── src/
+│       ├── types.ts                  # export type Foo = ...
+│       ├── sideEffect.ts             # import './setup'
+│       └── reexport.ts               # export { foo } from './bar'
+├── mixed-severity-project/
+│   ├── puffin.json                   # line-limits: error, naming: warn
+│   └── src/
+│       └── badFile.ts                # Violates both rules
+```
+
+---
+
+### Phase 4: Performance & Scale (Medium Priority)
+
+**Goal:** Verify the tool performs well on large codebases.
+
+#### Integration Tests
+
+| File | Scenarios |
+|------|-----------|
+| `performance.test.ts` | Scan 1000+ files (< 10s), large file (10K+ lines), deep nesting (20+ levels), memory stays under 512MB |
+
+#### Fixtures
+
+```
+tests/integration/fixtures/
+├── large-project/
+│   ├── puffin.json
+│   └── src/
+│       └── [generated 1000+ small files]
+├── deep-nesting-project/
+│   ├── puffin.json
+│   └── src/
+│       └── a/b/c/d/e/f/g/h/i/j/k/l/m/n/o/p/q/r/s/t/file.ts
+```
+
+**Note:** Large fixtures should be generated programmatically in test setup, not committed.
+
+---
+
+### Phase 5: Platform Compatibility (Medium Priority)
+
+**Goal:** Ensure consistent behavior across operating systems.
+
+#### Integration Tests
+
+| File | Scenarios |
+|------|-----------|
+| `platform.test.ts` | Windows backslash normalization, case-insensitive filesystem behavior, symlink handling, long paths (Windows 260 char limit) |
+
+#### CI Matrix
+
+```yaml
+# .github/workflows/test.yml
+strategy:
+  matrix:
+    os: [ubuntu-latest, windows-latest, macos-latest]
+    node: [18, 20, 22]
+```
+
+---
+
+### Phase 6: Plugin Robustness (Medium Priority)
+
+**Goal:** Ensure build plugins handle all scenarios correctly.
+
+#### Integration Tests
+
+| File | Scenarios |
+|------|-----------|
+| `vite-plugin-advanced.test.ts` | HMR triggers rescan, build fails on `severity: error`, plugin disabled via config, custom config path |
+| `next-plugin-advanced.test.ts` | `NODE_ENV` behavior (dev vs prod), CI environment detection, `enabled: false` option, missing config fallback |
+
+---
+
+### Phase 7: Import Resolution (Low Priority)
+
+**Goal:** Handle complex module resolution patterns.
+
+#### Unit Tests
+
+| File | Tests to Add |
+|------|--------------|
+| `import-resolution.test.ts` | tsconfig.json paths, scoped packages (`@scope/pkg`), package.json `exports` field, webpack/vite aliases |
+
+#### Integration Tests
+
+| File | Scenarios |
+|------|-----------|
+| `tsconfig-paths.test.ts` | Project with path aliases, baseUrl resolution, multiple tsconfig files |
+
+---
+
+### Phase 8: Polish & UX (Low Priority)
+
+**Goal:** Improve developer experience and output quality.
+
+#### Integration Tests
+
+| File | Scenarios |
+|------|-----------|
+| `cli-ux.test.ts` | Progress output for large scans, quiet mode (if implemented), JSON output to stdout |
+| `report-edge-cases.test.ts` | Report file overwrite behavior, directory creation, concurrent writes |
+
+---
+
+### Implementation Summary
+
+| Phase | Priority | Effort | Files Added |
+|-------|----------|--------|-------------|
+| 1. Error Handling | Critical | 3-4 days | 3 unit, 2 integration, 2 fixtures |
+| 2. Edge Cases | High | 4-5 days | 6 unit updates, 2 integration, 3 fixtures |
+| 3. Advanced Rules | High | 3-4 days | 4 integration, 4 fixtures |
+| 4. Performance | Medium | 2-3 days | 1 integration, 2 fixtures (generated) |
+| 5. Platform | Medium | 2-3 days | 1 integration, CI matrix |
+| 6. Plugins | Medium | 2-3 days | 2 integration |
+| 7. Import Resolution | Low | 3-4 days | 1 unit, 1 integration |
+| 8. Polish | Low | 2-3 days | 2 integration |
+
+**Total Estimated Effort:** 22-29 days for full coverage
+
+---
+
+### Acceptance Criteria for Production Release
+
+Before v1.0 release, the following must be true:
+
+- [ ] All Phase 1 (Error Handling) tests pass
+- [ ] All Phase 2 (Edge Cases) tests pass
+- [ ] All Phase 3 (Advanced Rules) tests pass
+- [ ] CI runs on Windows, macOS, and Linux
+- [ ] No test flakiness (3 consecutive green runs)
+- [ ] Test coverage report shows >80% line coverage on `src/core/` and `src/rules/`
+- [ ] README includes "tested on Node 18/20/22" badge

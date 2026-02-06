@@ -74,8 +74,8 @@ export function reportMarkdown(results: RuleResult[], root: string): string {
   lines.push(`- **Scan Date**: ${new Date().toLocaleString()}`);
   lines.push('');
   lines.push('### 📊 Summary');
-  lines.push(`- **Total Issues**: ${summary.total}`);
-  lines.push(`- **Errors**: ${summary.errors} (CRITICAL: Fix these first)`);
+  lines.push(`**Total Issues**: ${summary.total}`);
+  lines.push(`- **Errors**: ${summary.errors}`);
   lines.push(`- **Warnings**: ${summary.warnings}`);
   lines.push('');
 
@@ -124,9 +124,9 @@ export function writeReportFile(config: Config, results: RuleResult[], root: str
   const formatter = format === 'markdown' ? reportMarkdown : reportJson;
   const content = formatter(results, root);
 
-  // Replace [timestamp] if present
+  // Replace [timestamp] if present (only for JSON reports to keep Markdown reports stable)
   let finalFileName = fileName;
-  if (finalFileName.includes('[timestamp]')) {
+  if (format === 'json' && finalFileName.includes('[timestamp]')) {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
     finalFileName = finalFileName.replace('[timestamp]', timestamp);
   }

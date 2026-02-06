@@ -111,7 +111,7 @@ CodePuffin uses a configuration file (`puffin.json`) to determine which rules to
   },
   "output": {
     "format": "markdown",
-    "reportFile": "./reports/[timestamp]-scan-results.md"
+    "reportFile": "./reports/puffin-report.md"
   }
 }
 ```

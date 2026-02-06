@@ -65,7 +65,7 @@ describe('reportJson', () => {
 });
 
 describe('reportMarkdown', () => {
-  it('includes header and summary line', () => {
+  it('includes header and summary section', () => {
     const results: RuleResult[] = [
       makeResult({ severity: 'error' }),
       makeResult({ severity: 'warn', message: 'A warning' }),
@@ -73,13 +73,23 @@ describe('reportMarkdown', () => {
 
     const output = reportMarkdown(results, root);
 
-    expect(output).toContain('# CodePuffin Scan Report');
-    expect(output).toContain('**Total issues:** 2');
-    expect(output).toContain('**Errors:** 1');
-    expect(output).toContain('**Warnings:** 1');
+    expect(output).toContain('# 🐧 CodePuffin Scan Report');
+    expect(output).toContain('### 📊 Summary');
+    expect(output).toContain('**Total Issues**: 2');
+    expect(output).toContain('**Errors**: 1');
+    expect(output).toContain('**Warnings**: 1');
   });
 
-  it('groups results by file', () => {
+  it('includes agent mission section', () => {
+    const results: RuleResult[] = [makeResult()];
+
+    const output = reportMarkdown(results, root);
+
+    expect(output).toContain('## 🤖 Agent Mission');
+    expect(output).toContain('AI developer');
+  });
+
+  it('renders issues in a table format', () => {
     const results: RuleResult[] = [
       makeResult({ file: '/project/src/a.ts', message: 'Issue A' }),
       makeResult({ file: '/project/src/b.ts', message: 'Issue B' }),
@@ -87,16 +97,18 @@ describe('reportMarkdown', () => {
 
     const output = reportMarkdown(results, root);
 
-    expect(output).toContain('## src/a.ts');
-    expect(output).toContain('## src/b.ts');
+    expect(output).toContain('| File Path | Line | Severity |');
+    expect(output).toContain('`src/a.ts`');
+    expect(output).toContain('`src/b.ts`');
   });
 
-  it('renders table rows with line numbers', () => {
+  it('renders table rows with line numbers using [L#] format', () => {
     const results: RuleResult[] = [makeResult({ line: 10, severity: 'error' })];
 
     const output = reportMarkdown(results, root);
 
-    expect(output).toContain('| 10 | ERROR | test-rule | Something is wrong |');
+    expect(output).toContain('[L10]');
+    expect(output).toContain('🔴 **ERROR**');
   });
 
   it('renders dash for missing line numbers', () => {
@@ -104,13 +116,15 @@ describe('reportMarkdown', () => {
 
     const output = reportMarkdown(results, root);
 
-    expect(output).toContain('| - | ERROR | test-rule | Something is wrong |');
+    // Line column shows - for missing line numbers
+    expect(output).toContain('| `src/file.ts` | - |');
+    expect(output).toContain('🔴 **ERROR**');
   });
 
-  it('handles empty results', () => {
+  it('handles empty results with success message', () => {
     const output = reportMarkdown([], root);
 
-    expect(output).toContain('**Total issues:** 0');
-    expect(output).not.toContain('##');
+    expect(output).toContain('**Total Issues**: 0');
+    expect(output).toContain('Great job! No issues found.');
   });
 });
