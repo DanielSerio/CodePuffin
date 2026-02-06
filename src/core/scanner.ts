@@ -32,8 +32,9 @@ export class Scanner {
   }
 
   async createContext(): Promise<ScanContext> {
-    const include = this.config.project?.include || ['src/**/*'];
-    const exclude = this.config.project?.exclude || ['node_modules', 'dist', '**/*.test.*'];
+    const normalizeGlob = (p: string) => p.replace(/\\/g, '/');
+    const include = (this.config.project?.include || ['src/**/*']).map(normalizeGlob);
+    const exclude = (this.config.project?.exclude || ['node_modules', 'dist', '**/*.test.*']).map(normalizeGlob);
 
     // 1. Get all files matching project patterns, filtered to source code only
     const allFiles = await fg(include, {
@@ -42,22 +43,21 @@ export class Scanner {
       absolute: true,
       onlyFiles: true,
     });
-    const files = allFiles.filter(isSourceFile);
+    // Normalize discovered files to use forward slashes internally
+    const files = allFiles.map(f => f.replace(/\\/g, '/')).filter(isSourceFile);
 
     // 2. Resolve modules
     const modules: Record<string, string[]> = {};
     if (this.config.modules) {
       for (const [name, pattern] of Object.entries(this.config.modules)) {
-        // Handle bracket expansion if needed, but fast-glob handles it mostly.
-        // We filter the already found files to ensure we only include what's in the project.
-        const moduleFiles = await fg(pattern as string, {
+        const moduleFiles = await fg(normalizeGlob(pattern as string), {
           cwd: this.root,
           ignore: exclude,
           absolute: true,
           onlyFiles: true,
         });
 
-        modules[name] = moduleFiles.filter(isSourceFile);
+        modules[name] = moduleFiles.map(f => f.replace(/\\/g, '/')).filter(isSourceFile);
       }
     }
 
