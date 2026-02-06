@@ -1,0 +1,11 @@
+{
+  "name": "vite-advanced-project",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build"
+  },
+  "devDependencies": {
+    "vite": "latest"
+  }
+}

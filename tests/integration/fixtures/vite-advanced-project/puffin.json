@@ -1,0 +1,11 @@
+{
+  "project": {
+    "include": ["src/**/*"]
+  },
+  "rules": {
+    "naming-convention": {
+      "severity": "error",
+      "files": "kebab-case"
+    }
+  }
+}

@@ -3,7 +3,8 @@
     "allow": [
       "Bash(npx tsc:*)",
       "Bash(pnpm test:unit:*)",
-      "Bash(pnpm test:integration:*)"
+      "Bash(pnpm test:integration:*)",
+      "Bash(node:*)"
     ]
   }
 }

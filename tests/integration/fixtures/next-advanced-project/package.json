@@ -1,0 +1,7 @@
+{
+  "name": "next-advanced-project",
+  "private": true,
+  "scripts": {
+    "dev": "node run-plugin.cjs"
+  }
+}

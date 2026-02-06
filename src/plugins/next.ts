@@ -8,6 +8,7 @@ import pc from 'picocolors';
 export interface NextPluginOptions {
   configPath?: string;
   enabled?: boolean;
+  failOnError?: boolean;
 }
 
 interface NextConfig {
@@ -52,6 +53,12 @@ export default function withCodePuffin(nextConfig: NextConfig = {}, options: Nex
 
           // Write report file if configured
           writeReportFile(config, scanResults, root);
+
+          if (options.failOnError && scanResults.some(r => r.severity === 'error')) {
+            throw new Error('[CodePuffin] Architectural scan failed with errors.');
+          }
+        } else if (loaded && !loaded.success) {
+          console.warn(pc.yellow(`[CodePuffin] Invalid configuration:\n${loaded.error}`));
         }
       }
 

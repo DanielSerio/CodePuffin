@@ -8,10 +8,15 @@ import pc from 'picocolors';
 
 export interface VitePluginOptions {
   configPath?: string;
+  enabled?: boolean;
+  failOnError?: boolean;
 }
 
 export default function codePuffinPlugin(options: VitePluginOptions = {}): Plugin {
   async function runScan(root: string) {
+    const enabled = options.enabled ?? true;
+    if (!enabled) return;
+
     const configPath = path.resolve(root, options.configPath || 'puffin.json');
 
     let loaded;
@@ -42,10 +47,15 @@ export default function codePuffinPlugin(options: VitePluginOptions = {}): Plugi
         const label = res.severity === 'error' ? pc.red('ERROR') : pc.yellow('WARN');
         console.log(`  ${label} ${pc.bold(res.ruleId)}: ${res.message} (${location})`);
       });
+      console.log('');
     }
 
     // Write report file if configured
     writeReportFile(config, scanResults, root);
+
+    if (options.failOnError && scanResults.some(r => r.severity === 'error')) {
+      throw new Error('[CodePuffin] Architectural scan failed with errors.');
+    }
   }
 
   return {
