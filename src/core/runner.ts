@@ -9,13 +9,9 @@ export class Runner {
   }
 
   async run(context: ScanContext): Promise<RuleResult[]> {
-    const allResults: RuleResult[] = [];
-
-    for (const rule of this.rules) {
-      const results = await rule.run(context);
-      allResults.push(...results);
-    }
-
-    return allResults;
+    const results = await Promise.all(
+      this.rules.map(rule => rule.run(context))
+    );
+    return results.flat();
   }
 }

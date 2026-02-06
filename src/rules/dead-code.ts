@@ -1,4 +1,7 @@
 import ts from 'typescript';
+import fg from 'fast-glob';
+import path from 'path';
+import pc from 'picocolors';
 import { readFileSync } from 'fs';
 import { Rule, RuleResult } from '../core/rules';
 import { ScanContext } from '../core/scanner';
@@ -12,6 +15,19 @@ export class DeadCodeRule implements Rule {
 
     const results: RuleResult[] = [];
     const { severity, unusedExports, unusedVariables } = config;
+
+    // Resolve excluded file patterns (e.g., entry points like "**/index.ts")
+    const excludedFiles = new Set<string>();
+    if (config.exclude?.length) {
+      const matched = await fg(config.exclude, {
+        cwd: context.root,
+        absolute: true,
+        onlyFiles: true,
+      });
+      for (const file of matched) {
+        excludedFiles.add(file);
+      }
+    }
 
     const exportMap = new Map<string, { file: string, line: number, name: string; }>();
     const importStats = new Set<string>();
@@ -89,15 +105,17 @@ export class DeadCodeRule implements Rule {
         };
 
         walk(sourceFile);
-      } catch (err) { /* ignore */ }
+      } catch (err) {
+        const rel = path.relative(context.root, filePath);
+        console.warn(pc.yellow(`[dead-code] Skipping unparseable file: ${rel}`));
+      }
     }
 
-    // 2. Pass 2: Report Unused Exports
+    // 2. Pass 2: Report Unused Exports (skip excluded files)
     if (unusedExports) {
-      exportMap.forEach((info, key) => {
+      exportMap.forEach((info) => {
+        if (excludedFiles.has(info.file)) return;
         if (!importStats.has(info.name)) {
-          // Special case: entry points like index.ts/main.ts might be "unused" by other imports but are entry points.
-          // For now, we report them all.
           results.push({
             ruleId: this.id,
             file: info.file,

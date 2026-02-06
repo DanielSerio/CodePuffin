@@ -1,5 +1,15 @@
 import { z } from 'zod';
 
+// Per-module overrides for naming conventions
+const NamingOverrideSchema = z.object({
+  files: z.string().optional(),
+  variables: z.string().optional(),
+  functions: z.string().optional(),
+  classes: z.string().optional(),
+});
+
+export type NamingOverride = z.infer<typeof NamingOverrideSchema>;
+
 export const ConfigSchema = z.object({
   project: z.object({
     include: z.array(z.string()).default(['src/**/*']),
@@ -24,7 +34,7 @@ export const ConfigSchema = z.object({
       variables: z.string().default('camelCase'),
       functions: z.string().default('camelCase'),
       classes: z.string().default('PascalCase'),
-      overrides: z.record(z.any()).optional(),
+      overrides: z.record(NamingOverrideSchema).optional(),
     }).optional(),
   }).default({}),
   output: z.object({

@@ -98,7 +98,7 @@ CodePuffin uses a configuration file (`puffin.json`) to determine which rules to
         "@components": { "files": "PascalCase" },
         "@hooks": { "functions": "useCamelCase" },
         "@constants": { "variables": "UPPER_SNAKE_CASE" },
-        "@contexts": { "functions": "usePascalCase" }
+        "@contexts": { "functions": "useCamelCase" }
       }
     }
   },

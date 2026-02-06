@@ -1,5 +1,6 @@
 import ts from 'typescript';
 import path from 'path';
+import pc from 'picocolors';
 import { readFileSync } from 'fs';
 import { Rule, RuleResult } from '../core/rules';
 import { ScanContext } from '../core/scanner';
@@ -26,14 +27,13 @@ export class NamingConventionRule implements Rule {
 
       if (overrides) {
         for (const [moduleRef, moduleOverrides] of Object.entries(overrides)) {
-          const overridesAny = moduleOverrides as any;
           if (moduleRef.startsWith('@')) {
             const moduleName = moduleRef.slice(1);
             if (context.modules[moduleName]?.includes(filePath)) {
-              if (overridesAny.files) fileStyle = overridesAny.files;
-              if (overridesAny.variables) varStyle = overridesAny.variables;
-              if (overridesAny.functions) funcStyle = overridesAny.functions;
-              if (overridesAny.classes) classStyle = overridesAny.classes;
+              if (moduleOverrides.files) fileStyle = moduleOverrides.files as CaseStyle;
+              if (moduleOverrides.variables) varStyle = moduleOverrides.variables as CaseStyle;
+              if (moduleOverrides.functions) funcStyle = moduleOverrides.functions as CaseStyle;
+              if (moduleOverrides.classes) classStyle = moduleOverrides.classes as CaseStyle;
             }
           }
         }
@@ -97,7 +97,8 @@ export class NamingConventionRule implements Rule {
 
         walk(sourceFile);
       } catch (err) {
-        // Skip files that fail to parse
+        const rel = path.relative(context.root, filePath);
+        console.warn(pc.yellow(`[naming-convention] Skipping unparseable file: ${rel}`));
       }
     }
 

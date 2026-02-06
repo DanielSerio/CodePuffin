@@ -12,8 +12,6 @@ export function checkCase(name: string, style: CaseStyle): boolean {
       return /^[A-Z0-9]+(_[A-Z0-9]+)*$/.test(name);
     case 'useCamelCase':
       return /^use[A-Z][a-zA-Z0-9]*$/.test(name);
-    case 'usePascalCase':
-      return /^use[A-Z][a-zA-Z0-9]*$/.test(name); // Same as PascalCase but starting with 'use'
     default:
       return true;
   }

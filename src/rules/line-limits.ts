@@ -1,4 +1,6 @@
 import { readFileSync } from 'fs';
+import path from 'path';
+import pc from 'picocolors';
 import { Rule, RuleResult } from '../core/rules';
 import { ScanContext } from '../core/scanner';
 
@@ -42,7 +44,8 @@ export class LineLimitsRule implements Rule {
           });
         }
       } catch (err) {
-        // Skip files that can't be read
+        const rel = path.relative(context.root, filePath);
+        console.warn(pc.yellow(`[line-limits] Skipping unreadable file: ${rel}`));
       }
     }
 

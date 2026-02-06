@@ -2,6 +2,19 @@ import fg from 'fast-glob';
 import path from 'path';
 import { Config } from './config';
 
+// Only scan text-based source files; skip binaries, images, fonts, etc.
+const SOURCE_EXTENSIONS = new Set([
+  '.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs',
+  '.vue', '.svelte', '.astro',
+  '.css', '.scss', '.less',
+  '.html', '.json', '.yaml', '.yml',
+  '.md', '.mdx',
+]);
+
+function isSourceFile(filePath: string): boolean {
+  return SOURCE_EXTENSIONS.has(path.extname(filePath).toLowerCase());
+}
+
 export interface ScanContext {
   root: string;
   config: Config;
@@ -22,13 +35,14 @@ export class Scanner {
     const include = this.config.project?.include || ['src/**/*'];
     const exclude = this.config.project?.exclude || ['node_modules', 'dist', '**/*.test.*'];
 
-    // 1. Get all files matching project patterns
-    const files = await fg(include, {
+    // 1. Get all files matching project patterns, filtered to source code only
+    const allFiles = await fg(include, {
       cwd: this.root,
       ignore: exclude,
       absolute: true,
       onlyFiles: true,
     });
+    const files = allFiles.filter(isSourceFile);
 
     // 2. Resolve modules
     const modules: Record<string, string[]> = {};
@@ -38,12 +52,12 @@ export class Scanner {
         // We filter the already found files to ensure we only include what's in the project.
         const moduleFiles = await fg(pattern as string, {
           cwd: this.root,
-          ignore: exclude, // Still ignore global excludes
+          ignore: exclude,
           absolute: true,
           onlyFiles: true,
         });
 
-        modules[name] = moduleFiles;
+        modules[name] = moduleFiles.filter(isSourceFile);
       }
     }
 
@@ -55,27 +69,4 @@ export class Scanner {
     };
   }
 
-  /**
-   * Resolves module references (e.g., "@ui") to actual file paths.
-   */
-  resolveFiles(patterns: string[], context: ScanContext): string[] {
-    const resolved: Set<string> = new Set();
-
-    for (const pattern of patterns) {
-      if (pattern.startsWith('@')) {
-        const moduleName = pattern.slice(1);
-        const moduleFiles = context.modules[moduleName];
-        if (moduleFiles) {
-          moduleFiles.forEach(f => resolved.add(f));
-        }
-      } else {
-        // If it's a direct glob pattern, we match against context.files
-        // For simplicity in Phase 1, we just return the pattern and let individual rules handle it 
-        // OR we can do a local glob here. Let's do a local glob for consistency.
-        // But rule-level excludes/includes should be matched against the absolute paths in context.files.
-      }
-    }
-
-    return Array.from(resolved);
-  }
 }
