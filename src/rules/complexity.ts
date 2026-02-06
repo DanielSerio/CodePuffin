@@ -42,6 +42,15 @@ export function calculateCyclomatic(node: ts.Node, source: ts.SourceFile): numbe
         }
         break;
       }
+      case ts.SyntaxKind.PropertyAccessExpression:
+      case ts.SyntaxKind.ElementAccessExpression:
+      case ts.SyntaxKind.CallExpression: {
+        // Optional chaining (?.) counts as a decision point
+        if ((child as any).questionDotToken) {
+          complexity++;
+        }
+        break;
+      }
     }
     ts.forEachChild(child, walk);
   };
@@ -215,6 +224,14 @@ function findFunctions(sourceFile: ts.SourceFile): FunctionInfo[] {
           line: sourceFile.getLineAndCharacterOfPosition(parent.name.getStart()).line + 1,
         });
       }
+    } else if ((ts.isGetAccessorDeclaration(node) || ts.isSetAccessorDeclaration(node)) && node.name && node.body) {
+      const name = ts.isIdentifier(node.name) ? node.name.text : node.name.getText(sourceFile);
+      const prefix = ts.isGetAccessor(node) ? 'get ' : 'set ';
+      functions.push({
+        name: prefix + name,
+        node: node.body,
+        line: sourceFile.getLineAndCharacterOfPosition(node.name.getStart()).line + 1,
+      });
     }
 
     ts.forEachChild(node, walk);

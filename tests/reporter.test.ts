@@ -120,11 +120,27 @@ describe('reportMarkdown', () => {
     expect(output).toContain('| `src/file.ts` | - |');
     expect(output).toContain('🔴 **ERROR**');
   });
-
   it('handles empty results with success message', () => {
     const output = reportMarkdown([], root);
 
     expect(output).toContain('**Total Issues**: 0');
     expect(output).toContain('Great job! No issues found.');
+  });
+
+  it('escapes pipe characters in markdown tables', () => {
+    const results: RuleResult[] = [
+      makeResult({
+        message: 'Message | with pipe',
+        suggestion: 'Suggestion | with pipe',
+        ruleId: 'rule|pipe'
+      })
+    ];
+
+    const output = reportMarkdown(results, root);
+
+    // Should contain escaped pipes \|
+    expect(output).toContain('Message \\| with pipe');
+    expect(output).toContain('Suggestion \\| with pipe');
+    expect(output).toContain('rule\\|pipe');
   });
 });

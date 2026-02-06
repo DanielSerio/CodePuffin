@@ -8,6 +8,8 @@ import { NamingConventionRule } from '../rules/naming-convention';
 import { DeadCodeRule } from '../rules/dead-code';
 import { ComplexityRule } from '../rules/complexity';
 import { CircularDependenciesRule } from '../rules/circular-dependencies';
+import { NoAnyRule } from '../rules/no-any';
+import { NoEnumRule } from '../rules/no-enum';
 
 // Create a runner populated with all rules enabled in the config
 export function createRunner(config: Config): Runner {
@@ -17,6 +19,8 @@ export function createRunner(config: Config): Runner {
   if (config.rules?.['dead-code']) runner.addRule(new DeadCodeRule());
   if (config.rules?.['complexity']) runner.addRule(new ComplexityRule());
   if (config.rules?.['circular-dependencies']) runner.addRule(new CircularDependenciesRule());
+  if (config.rules?.['no-any']) runner.addRule(new NoAnyRule());
+  if (config.rules?.['no-enum']) runner.addRule(new NoEnumRule());
   return runner;
 }
 

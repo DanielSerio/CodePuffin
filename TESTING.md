@@ -289,27 +289,27 @@ tests/integration/fixtures/
 
 ---
 
-### Phase 2: Edge Cases & Boundary Conditions (High Priority)
+### Phase 2: Edge Cases & Boundary Conditions (Completed ✅)
 
 **Goal:** Handle unusual but valid inputs correctly.
 
 #### Unit Tests
 
-| File                            | Tests to Add                                                                                  |
-| ------------------------------- | --------------------------------------------------------------------------------------------- |
-| `naming.test.ts`                | Empty strings, numeric-only names, single chars, `suggestName()`, `usePascalCase` style       |
-| `complexity.test.ts`            | Async/await, optional chaining `?.`, nested functions, arrow function bodies, getters/setters |
-| `circular-dependencies.test.ts` | Dynamic imports `import()`, re-exports `export * from`, barrel files (index.ts), self-imports |
-| `line-limits.test.ts`           | CRLF vs LF counting, empty files (0 vs 1 line), BOM handling                                  |
-| `dead-code.test.ts`             | `export type`, `export * from`, side-effect imports, namespace exports                        |
-| `reporter.test.ts`              | Pipe chars in markdown, very long messages, 1000+ results, special chars in paths             |
+| File                            | Tests to Add                                                                                     |
+| ------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `naming.test.ts`                | Empty strings, numeric-only names, single chars, `suggestName()`, `usePascalCase` style ✅       |
+| `complexity.test.ts`            | Async/await, optional chaining `?.`, nested functions, arrow function bodies, getters/setters ✅ |
+| `circular-dependencies.test.ts` | Dynamic imports `import()`, re-exports `export * from`, barrel files (index.ts), self-imports ✅ |
+| `line-limits.test.ts`           | CRLF vs LF counting, empty files (0 vs 1 line), BOM handling ✅                                  |
+| `dead-code.test.ts`             | `export type`, `export * from`, side-effect imports, namespace exports ✅                        |
+| `reporter.test.ts`              | Pipe chars in markdown, very long messages, 1000+ results, special chars in paths ✅             |
 
 #### Integration Tests
 
-| File                       | Scenarios                                                                                     |
-| -------------------------- | --------------------------------------------------------------------------------------------- |
-| `edge-cases.test.ts`       | Paths with spaces, unicode filenames, very long paths (260+ chars), special chars in messages |
-| `module-overrides.test.ts` | Named modules with different thresholds, invalid module references, overlapping modules       |
+| File                       | Scenarios                                                                                        |
+| -------------------------- | ------------------------------------------------------------------------------------------------ |
+| `edge-cases.test.ts`       | Paths with spaces, unicode filenames, very long paths (260+ chars), special chars in messages ✅ |
+| `module-overrides.test.ts` | Named modules with different thresholds, invalid module references, overlapping modules ✅       |
 
 #### Fixtures
 
@@ -332,18 +332,20 @@ tests/integration/fixtures/
 
 ---
 
-### Phase 3: Advanced Rule Scenarios (High Priority)
+### Phase 3: Advanced Rule Scenarios (Completed ✅)
 
 **Goal:** Cover complex real-world code patterns.
 
 #### Integration Tests
 
-| File                         | Scenarios                                                                           |
-| ---------------------------- | ----------------------------------------------------------------------------------- |
-| `multi-cycle.test.ts`        | 3+ independent cycles, large cycle chains (5+ files), cycles through barrel exports |
-| `barrel-exports.test.ts`     | Re-export chains, `export * from` patterns, index.ts aggregation                    |
-| `dead-code-advanced.test.ts` | Type-only exports, conditional exports, tree-shaking scenarios                      |
-| `mixed-severity.test.ts`     | Project with both `error` and `warn` violations (exit code should be 1)             |
+| File                         | Scenarios                                                                              |
+| ---------------------------- | -------------------------------------------------------------------------------------- |
+| `multi-cycle.test.ts`        | 3+ independent cycles, large cycle chains (5+ files), cycles through barrel exports ✅ |
+| `barrel-exports.test.ts`     | Re-export chains, `export * from` patterns, index.ts aggregation ✅                    |
+| `dead-code-advanced.test.ts` | Type-only exports, conditional exports, tree-shaking scenarios ✅                      |
+| `mixed-severity.test.ts`     | Project with both `error` and `warn` violations (exit code should be 1) ✅             |
+| `no-any.test.ts`             | Detects `any` in variables, parameters, and return types                               |
+| `no-enum.test.ts`            | Detects `enum` declarations in various contexts                                        |
 
 #### Fixtures
 
@@ -491,8 +493,8 @@ strategy:
 Before v1.0 release, the following must be true:
 
 - [x] All Phase 1 (Error Handling) tests pass
-- [ ] All Phase 2 (Edge Cases) tests pass
-- [ ] All Phase 3 (Advanced Rules) tests pass
+- [x] All Phase 2 (Edge Cases) tests pass
+- [x] All Phase 3 (Advanced Rules) tests pass
 - [ ] CI runs on Windows, macOS, and Linux
 - [ ] No test flakiness (3 consecutive green runs)
 - [ ] Test coverage report shows >80% line coverage on `src/core/` and `src/rules/`

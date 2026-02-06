@@ -33,7 +33,7 @@ export class LineLimitsRule implements Rule {
 
       try {
         const content = readFileSync(filePath, 'utf-8');
-        const lines = content.split(/\r?\n/).length;
+        const lines = content.length === 0 ? 0 : content.split(/\r?\n/).length;
 
         if (lines > limit) {
           results.push({

@@ -56,6 +56,12 @@ export const ConfigSchema = z.object({
     'circular-dependencies': z.object({
       severity: z.enum(['error', 'warn']).default('error'),
     }).optional(),
+    'no-any': z.object({
+      severity: z.enum(['error', 'warn']).default('error'),
+    }).optional(),
+    'no-enum': z.object({
+      severity: z.enum(['error', 'warn']).default('error'),
+    }).optional(),
   }).default({}),
   output: z.object({
     format: z.enum(['json', 'markdown', 'stylish']).default('stylish'),

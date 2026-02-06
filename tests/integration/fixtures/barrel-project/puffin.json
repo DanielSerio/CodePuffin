@@ -1,0 +1,7 @@
+{
+  "rules": {
+    "circular-dependencies": {
+      "severity": "error"
+    }
+  }
+}

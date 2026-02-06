@@ -61,6 +61,7 @@ export function reportJson(results: RuleResult[], root: string): string {
 
 // Returns Markdown report optimized for human developers and AI coding agents
 export function reportMarkdown(results: RuleResult[], root: string): string {
+  const escapeTable = (str: string) => str.replace(/\|/g, '\\|');
   const summary = summarize(results);
   const lines: string[] = [];
 
@@ -94,7 +95,9 @@ export function reportMarkdown(results: RuleResult[], root: string): string {
     const line = r.line !== undefined ? `[L${r.line}]` : '-';
     const severity = r.severity === 'error' ? '🔴 **ERROR**' : '🟡 WARN';
     const suggestion = r.suggestion || 'N/A';
-    lines.push(`| \`${rel}\` | ${line} | ${severity} | \`${r.ruleId}\` | ${r.message} | *${suggestion}* | - [ ] |`);
+    const message = escapeTable(r.message);
+    const escSuggestion = escapeTable(suggestion);
+    lines.push(`| \`${escapeTable(rel)}\` | ${line} | ${severity} | \`${escapeTable(r.ruleId)}\` | ${message} | *${escSuggestion}* | - [ ] |`);
   }
 
   lines.push('');

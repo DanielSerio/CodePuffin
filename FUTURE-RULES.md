@@ -1,0 +1,2 @@
+- No TypeScript `any` types
+- No TypeScript `enum` types

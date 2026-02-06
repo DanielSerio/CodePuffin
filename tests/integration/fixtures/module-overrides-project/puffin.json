@@ -1,0 +1,13 @@
+{
+  "modules": {
+    "utils": "src/utils/**/*"
+  },
+  "rules": {
+    "line-limits": {
+      "default": 10,
+      "overrides": {
+        "@utils": 2
+      }
+    }
+  }
+}

@@ -50,8 +50,14 @@ export class DeadCodeRule implements Rule {
                   node.importClause.namedBindings.elements.forEach(el => {
                     importStats.add(el.name.text);
                   });
+                } else if (ts.isNamespaceImport(node.importClause.namedBindings)) {
+                  importStats.add(node.importClause.namedBindings.name.text);
                 }
               }
+            } else {
+              // Side-effect import: import './module';
+              // Mark the module itself as "used" or just ignore if we only track names.
+              // For now, names is all we have.
             }
           }
 
@@ -96,6 +102,24 @@ export class DeadCodeRule implements Rule {
                       name: decl.name.text
                     });
                   }
+                });
+              } else if (ts.isInterfaceDeclaration(node) && node.name) {
+                exportMap.set(`${filePath}:${node.name.text}`, {
+                  file: filePath,
+                  line: sourceFile.getLineAndCharacterOfPosition(node.name.getStart()).line + 1,
+                  name: node.name.text
+                });
+              } else if (ts.isTypeAliasDeclaration(node) && node.name) {
+                exportMap.set(`${filePath}:${node.name.text}`, {
+                  file: filePath,
+                  line: sourceFile.getLineAndCharacterOfPosition(node.name.getStart()).line + 1,
+                  name: node.name.text
+                });
+              } else if (ts.isEnumDeclaration(node) && node.name) {
+                exportMap.set(`${filePath}:${node.name.text}`, {
+                  file: filePath,
+                  line: sourceFile.getLineAndCharacterOfPosition(node.name.getStart()).line + 1,
+                  name: node.name.text
                 });
               }
             }

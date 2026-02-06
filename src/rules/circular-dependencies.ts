@@ -71,6 +71,14 @@ export function buildImportGraph(
           addEdge(normalizedPath, specifier, knownFiles, graph);
         }
 
+        // Handle dynamic imports: import('./y')
+        if (ts.isCallExpression(node) && node.expression.kind === ts.SyntaxKind.ImportKeyword && node.arguments.length > 0) {
+          const arg = node.arguments[0];
+          if (ts.isStringLiteral(arg)) {
+            addEdge(normalizedPath, arg.text, knownFiles, graph);
+          }
+        }
+
         ts.forEachChild(node, walk);
       };
 

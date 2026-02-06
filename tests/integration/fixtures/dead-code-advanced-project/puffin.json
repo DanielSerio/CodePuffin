@@ -1,0 +1,11 @@
+{
+  "rules": {
+    "dead-code": {
+      "severity": "error",
+      "unusedExports": true,
+      "exclude": [
+        "**/main.ts"
+      ]
+    }
+  }
+}

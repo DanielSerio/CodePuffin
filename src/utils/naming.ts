@@ -12,6 +12,8 @@ export function checkCase(name: string, style: CaseStyle): boolean {
       return /^[A-Z0-9]+(_[A-Z0-9]+)*$/.test(name);
     case 'useCamelCase':
       return /^use[A-Z][a-zA-Z0-9]*$/.test(name);
+    case 'usePascalCase':
+      return /^Use[A-Z][a-zA-Z0-9]*$/.test(name);
     default:
       return true;
   }
@@ -30,9 +32,14 @@ export function suggestName(name: string, style: CaseStyle): string {
       return parts.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join('');
     case 'UPPER_SNAKE_CASE':
       return parts.join('_').toUpperCase();
-    case 'useCamelCase':
+    case 'useCamelCase': {
       const base = parts.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join('');
       return base.startsWith('Use') ? 'u' + base.slice(1) : 'use' + base;
+    }
+    case 'usePascalCase': {
+      const base = parts.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join('');
+      return base.startsWith('Use') ? base : 'Use' + base;
+    }
     default:
       return name;
   }

@@ -1,0 +1,11 @@
+{
+  "rules": {
+    "line-limits": {
+      "default": 2,
+      "severity": "warn"
+    },
+    "no-any": {
+      "severity": "error"
+    }
+  }
+}

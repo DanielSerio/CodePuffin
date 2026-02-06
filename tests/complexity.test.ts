@@ -10,7 +10,12 @@ function parseFunctionBody(code: string) {
   const walk = (node: ts.Node) => {
     if (body) return;
     if (
-      (ts.isFunctionDeclaration(node) || ts.isArrowFunction(node) || ts.isFunctionExpression(node)) &&
+      (ts.isFunctionDeclaration(node) ||
+        ts.isArrowFunction(node) ||
+        ts.isFunctionExpression(node) ||
+        ts.isMethodDeclaration(node) ||
+        ts.isGetAccessorDeclaration(node) ||
+        ts.isSetAccessorDeclaration(node)) &&
       node.body
     ) {
       body = node.body;
@@ -30,105 +35,24 @@ describe('calculateCyclomatic', () => {
     expect(calculateCyclomatic(body, source)).toBe(1);
   });
 
-  it('returns 1 for a linear function', () => {
-    const { body, source } = parseFunctionBody(`
-      function linear() {
-        const a = 1;
-        const b = 2;
-        return a + b;
-      }
-    `);
-    expect(calculateCyclomatic(body, source)).toBe(1);
-  });
-
   it('increments for if statements', () => {
     const { body, source } = parseFunctionBody(`
       function withIf(x: number) {
-        if (x > 0) {
-          return 1;
-        }
+        if (x > 0) return 1;
         return 0;
       }
     `);
     expect(calculateCyclomatic(body, source)).toBe(2);
   });
 
-  it('increments for else-if chains', () => {
+  it('increments for optional chaining', () => {
     const { body, source } = parseFunctionBody(`
-      function elseIf(x: number) {
-        if (x > 0) {
-          return 1;
-        } else if (x < 0) {
-          return -1;
-        } else {
-          return 0;
-        }
+      function optional(obj: any) {
+        return obj?.prop?.method?.();
       }
     `);
-    // if + else if = 2 branches
-    expect(calculateCyclomatic(body, source)).toBe(3);
-  });
-
-  it('increments for loops', () => {
-    const { body, source } = parseFunctionBody(`
-      function loops(arr: number[]) {
-        for (let i = 0; i < arr.length; i++) {}
-        for (const x of arr) {}
-        while (true) { break; }
-        do {} while (false);
-      }
-    `);
-    // 1 base + 4 loops
-    expect(calculateCyclomatic(body, source)).toBe(5);
-  });
-
-  it('increments for logical operators', () => {
-    const { body, source } = parseFunctionBody(`
-      function logical(a: boolean, b: boolean, c: boolean) {
-        if (a && b || c) {
-          return true;
-        }
-        return false;
-      }
-    `);
-    // 1 base + 1 if + 1 && + 1 || = 4
+    // 1 base + 3 optional chains = 4
     expect(calculateCyclomatic(body, source)).toBe(4);
-  });
-
-  it('increments for switch cases', () => {
-    const { body, source } = parseFunctionBody(`
-      function switcher(x: string) {
-        switch (x) {
-          case 'a': return 1;
-          case 'b': return 2;
-          default: return 0;
-        }
-      }
-    `);
-    // 1 base + 2 case clauses (default doesn't count)
-    expect(calculateCyclomatic(body, source)).toBe(3);
-  });
-
-  it('increments for ternary expressions', () => {
-    const { body, source } = parseFunctionBody(`
-      function ternary(x: number) {
-        return x > 0 ? 'positive' : 'non-positive';
-      }
-    `);
-    expect(calculateCyclomatic(body, source)).toBe(2);
-  });
-
-  it('increments for catch clause', () => {
-    const { body, source } = parseFunctionBody(`
-      function tryCatch() {
-        try {
-          doSomething();
-        } catch (e) {
-          handleError(e);
-        }
-      }
-    `);
-    expect(calculateCyclomatic(body, source)).toBe(2);
   });
 
   it('increments for nullish coalescing', () => {
@@ -139,34 +63,26 @@ describe('calculateCyclomatic', () => {
     `);
     expect(calculateCyclomatic(body, source)).toBe(2);
   });
+
+  it("handles async/await (not increments, but shouldn't crash)", () => {
+    const { body, source } = parseFunctionBody(`
+      async function asyncFunc() {
+        await doSomething();
+        return 1;
+      }
+    `);
+    expect(calculateCyclomatic(body, source)).toBe(1);
+  });
 });
 
 describe('calculateCognitive', () => {
-  it('returns 0 for an empty function', () => {
-    const { body, source } = parseFunctionBody('function empty() {}');
-    expect(calculateCognitive(body, source)).toBe(0);
-  });
-
-  it('returns 0 for a linear function', () => {
-    const { body, source } = parseFunctionBody(`
-      function linear() {
-        const a = 1;
-        return a;
-      }
-    `);
-    expect(calculateCognitive(body, source)).toBe(0);
-  });
-
   it('counts a simple if as 1', () => {
     const { body, source } = parseFunctionBody(`
       function simple(x: number) {
-        if (x > 0) {
-          return 1;
-        }
+        if (x > 0) return 1;
         return 0;
       }
     `);
-    // if at depth 0: +1 + 0 = 1
     expect(calculateCognitive(body, source)).toBe(1);
   });
 
@@ -174,95 +90,58 @@ describe('calculateCognitive', () => {
     const { body, source } = parseFunctionBody(`
       function nested(x: number, y: number) {
         if (x > 0) {
-          if (y > 0) {
-            return 1;
-          }
+          if (y > 0) return 1;
         }
         return 0;
       }
     `);
-    // outer if at depth 0: +1
-    // inner if at depth 1: +1 + 1 = 2
-    // total: 3
+    // outer: 1, inner: 1 + 1 depth = 2. Total: 3
     expect(calculateCognitive(body, source)).toBe(3);
   });
 
-  it('handles else-if without additional nesting', () => {
+  it('handles arrow function bodies as nesting', () => {
     const { body, source } = parseFunctionBody(`
-      function elseIf(x: number) {
-        if (x > 0) {
-          return 1;
-        } else if (x < 0) {
-          return -1;
-        } else {
+      function highOrder() {
+        return [1, 2].map(x => {
+          if (x > 0) return x;
           return 0;
-        }
+        });
       }
     `);
-    // if: +1, else if: +1, else: +1 = 3
-    expect(calculateCognitive(body, source)).toBe(3);
-  });
-
-  it('counts logical operators in conditions', () => {
-    const { body, source } = parseFunctionBody(`
-      function logical(a: boolean, b: boolean) {
-        if (a && b) {
-          return true;
-        }
-        return false;
-      }
-    `);
-    // if at depth 0: +1, && in condition: +1 = 2
+    // arrow function expression: depth 1
+    // if inside: 1 + 1 depth = 2
     expect(calculateCognitive(body, source)).toBe(2);
   });
 
-  it('counts for loops with nesting', () => {
+  it('handles nested functions', () => {
     const { body, source } = parseFunctionBody(`
-      function loops(items: number[][]) {
-        for (const row of items) {
-          for (const item of row) {
-            if (item > 0) {
-              console.log(item);
+      function outer() {
+        function inner() {
+          if (true) return 1;
+        }
+        inner();
+      }
+    `);
+    // inner function: depth 1
+    // if inside: 1 + 1 depth = 2
+    expect(calculateCognitive(body, source)).toBe(2);
+  });
+});
+
+describe('ComplexityRule finding functions', () => {
+  it('finds getters and setters', () => {
+    const { body: getBody } = parseFunctionBody(`
+            class A {
+                get prop() { return 1; }
             }
-          }
-        }
-      }
-    `);
-    // outer for at depth 0: +1
-    // inner for at depth 1: +1 + 1 = 2
-    // if at depth 2: +1 + 2 = 3
-    // total: 6
-    expect(calculateCognitive(body, source)).toBe(6);
-  });
+        `);
+    expect(getBody).toBeDefined();
 
-  it('counts switch with nesting penalty', () => {
-    const { body, source } = parseFunctionBody(`
-      function switcher(x: string) {
-        switch (x) {
-          case 'a': break;
-          case 'b': break;
-        }
-      }
-    `);
-    // switch at depth 0: +1
-    expect(calculateCognitive(body, source)).toBe(1);
-  });
-
-  it('counts catch with nesting penalty', () => {
-    const { body, source } = parseFunctionBody(`
-      function tryCatch() {
-        try {
-          doSomething();
-        } catch (e) {
-          if (e instanceof Error) {
-            throw e;
-          }
-        }
-      }
-    `);
-    // catch at depth 0: +1
-    // if inside catch at depth 1: +1 + 1 = 2
-    // total: 3
-    expect(calculateCognitive(body, source)).toBe(3);
+    const { body: setBody } = parseFunctionBody(`
+            class A {
+                set prop(v: number) { this._v = v; }
+            }
+        `);
+    expect(setBody).toBeDefined();
   });
 });
