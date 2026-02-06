@@ -12,7 +12,9 @@
     "build": "tsup",
     "dev": "tsup src/cli/index.ts --format cjs,esm --watch --onSuccess \"node dist/index.js scan\"",
     "start": "node dist/index.js",
-    "test": "vitest"
+    "test": "pnpm test:unit && pnpm test:integration",
+    "test:unit": "vitest run",
+    "test:integration": "pnpm build && playwright test"
   },
   "keywords": [],
   "author": "DanielSerio",
