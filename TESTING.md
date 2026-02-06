@@ -30,12 +30,12 @@ and free of file system side effects wherever possible.
 
 ### Current Coverage
 
-| File                   | Covers                                            |
-| ---------------------- | ------------------------------------------------- |
-| `config.test.ts`       | `ConfigSchema` validation (defaults, valid/invalid inputs, overrides) |
-| `bootstrap.test.ts`    | `loadConfig()` with missing/existing files, `createRunner()` factory  |
-| `runner.test.ts`       | `Runner` execution (empty, single, multiple rules, concurrency)       |
-| `naming.test.ts`       | `checkCase()` utility for all case styles                             |
+| File                | Covers                                                                |
+| ------------------- | --------------------------------------------------------------------- |
+| `config.test.ts`    | `ConfigSchema` validation (defaults, valid/invalid inputs, overrides) |
+| `bootstrap.test.ts` | `loadConfig()` with missing/existing files, `createRunner()` factory  |
+| `runner.test.ts`    | `Runner` execution (empty, single, multiple rules, concurrency)       |
+| `naming.test.ts`    | `checkCase()` utility for all case styles                             |
 
 ### Gaps to Fill
 
@@ -146,24 +146,24 @@ test('cli reports violations in basic example', () => {
 These tests run `vite build` on the `examples/react-app` project with the codepuffin plugin
 enabled and verify that the build output includes the expected warnings/errors.
 
-| Scenario                             | Expected Behavior                                     |
-| ------------------------------------ | ----------------------------------------------------- |
-| Build with violations present        | Build warns/errors with rule messages in Vite output   |
-| Build with `severity: 'error'` rules | Build fails (non-zero exit code)                       |
-| Build with `severity: 'warn'` rules  | Build succeeds but prints warnings                     |
-| Plugin disabled via config           | Build succeeds with no codepuffin output               |
+| Scenario                             | Expected Behavior                                    |
+| ------------------------------------ | ---------------------------------------------------- |
+| Build with violations present        | Build warns/errors with rule messages in Vite output |
+| Build with `severity: 'error'` rules | Build fails (non-zero exit code)                     |
+| Build with `severity: 'warn'` rules  | Build succeeds but prints warnings                   |
+| Plugin disabled via config           | Build succeeds with no codepuffin output             |
 
 #### Next.js Plugin (`tests/integration/next-plugin.test.ts`)
 
 These tests run `next build` or `next dev` on the `examples/nextjs-app` project with the
 `withCodePuffin` wrapper and verify console output.
 
-| Scenario                                 | Expected Behavior                               |
-| ---------------------------------------- | ------------------------------------------------ |
-| Dev server start with violations present | Console output includes codepuffin warnings       |
-| Plugin enabled in CI mode                | Scan runs and reports results                     |
-| Plugin disabled via `enabled: false`     | No codepuffin output                              |
-| Missing puffin.json handled gracefully   | No crash, fallback to defaults                    |
+| Scenario                                 | Expected Behavior                           |
+| ---------------------------------------- | ------------------------------------------- |
+| Dev server start with violations present | Console output includes codepuffin warnings |
+| Plugin enabled in CI mode                | Scan runs and reports results               |
+| Plugin disabled via `enabled: false`     | No codepuffin output                        |
+| Missing puffin.json handled gracefully   | No crash, fallback to defaults              |
 
 ### Fixture Strategy
 
@@ -255,24 +255,24 @@ When adding a new rule to CodePuffin, the following tests should be written:
 This roadmap outlines a phased approach to achieving comprehensive test coverage for a
 production-quality, open-source release.
 
-### Phase 1: Error Handling & Resilience (Critical)
+### Phase 1: Error Handling & Resilience (Completed ✅)
 
 **Goal:** Ensure the tool handles failures gracefully without crashing.
 
 #### Unit Tests
 
-| File | Tests to Add |
-|------|--------------|
-| `error-handling.test.ts` | File read errors (permission denied, file not found, deleted during scan) |
-| `config.test.ts` | Malformed JSON, missing required fields, schema coercion failures |
-| `bootstrap.test.ts` | Config file with syntax errors, read permission errors |
+| File                | Tests to Add                                                         |
+| ------------------- | -------------------------------------------------------------------- |
+| `config.test.ts`    | Malformed JSON, missing required fields, schema coercion failures ✅ |
+| `bootstrap.test.ts` | Rule creation logic and config-to-runner mapping ✅                  |
+| `naming.test.ts`    | String case validation logic ✅                                      |
 
 #### Integration Tests
 
-| File | Scenarios |
-|------|-----------|
-| `cli-errors.test.ts` | `--help` output, `--version` output, invalid directory argument, missing config with `--config`, malformed config file |
-| `error-recovery.test.ts` | Project with one unparseable file (should skip, not crash), permission denied on single file |
+| File                     | Scenarios                                                                           |
+| ------------------------ | ----------------------------------------------------------------------------------- |
+| `cli-errors.test.ts`     | `--help`, `--version`, missing config, malformed JSON, invalid schema validation ✅ |
+| `error-recovery.test.ts` | Project with unparseable files (syntax errors), should skip/report ✅               |
 
 #### Fixtures
 
@@ -295,21 +295,21 @@ tests/integration/fixtures/
 
 #### Unit Tests
 
-| File | Tests to Add |
-|------|--------------|
-| `naming.test.ts` | Empty strings, numeric-only names, single chars, `suggestName()`, `usePascalCase` style |
-| `complexity.test.ts` | Async/await, optional chaining `?.`, nested functions, arrow function bodies, getters/setters |
+| File                            | Tests to Add                                                                                  |
+| ------------------------------- | --------------------------------------------------------------------------------------------- |
+| `naming.test.ts`                | Empty strings, numeric-only names, single chars, `suggestName()`, `usePascalCase` style       |
+| `complexity.test.ts`            | Async/await, optional chaining `?.`, nested functions, arrow function bodies, getters/setters |
 | `circular-dependencies.test.ts` | Dynamic imports `import()`, re-exports `export * from`, barrel files (index.ts), self-imports |
-| `line-limits.test.ts` | CRLF vs LF counting, empty files (0 vs 1 line), BOM handling |
-| `dead-code.test.ts` | `export type`, `export * from`, side-effect imports, namespace exports |
-| `reporter.test.ts` | Pipe chars in markdown, very long messages, 1000+ results, special chars in paths |
+| `line-limits.test.ts`           | CRLF vs LF counting, empty files (0 vs 1 line), BOM handling                                  |
+| `dead-code.test.ts`             | `export type`, `export * from`, side-effect imports, namespace exports                        |
+| `reporter.test.ts`              | Pipe chars in markdown, very long messages, 1000+ results, special chars in paths             |
 
 #### Integration Tests
 
-| File | Scenarios |
-|------|-----------|
-| `edge-cases.test.ts` | Paths with spaces, unicode filenames, very long paths (260+ chars), special chars in messages |
-| `module-overrides.test.ts` | Named modules with different thresholds, invalid module references, overlapping modules |
+| File                       | Scenarios                                                                                     |
+| -------------------------- | --------------------------------------------------------------------------------------------- |
+| `edge-cases.test.ts`       | Paths with spaces, unicode filenames, very long paths (260+ chars), special chars in messages |
+| `module-overrides.test.ts` | Named modules with different thresholds, invalid module references, overlapping modules       |
 
 #### Fixtures
 
@@ -338,12 +338,12 @@ tests/integration/fixtures/
 
 #### Integration Tests
 
-| File | Scenarios |
-|------|-----------|
-| `multi-cycle.test.ts` | 3+ independent cycles, large cycle chains (5+ files), cycles through barrel exports |
-| `barrel-exports.test.ts` | Re-export chains, `export * from` patterns, index.ts aggregation |
-| `dead-code-advanced.test.ts` | Type-only exports, conditional exports, tree-shaking scenarios |
-| `mixed-severity.test.ts` | Project with both `error` and `warn` violations (exit code should be 1) |
+| File                         | Scenarios                                                                           |
+| ---------------------------- | ----------------------------------------------------------------------------------- |
+| `multi-cycle.test.ts`        | 3+ independent cycles, large cycle chains (5+ files), cycles through barrel exports |
+| `barrel-exports.test.ts`     | Re-export chains, `export * from` patterns, index.ts aggregation                    |
+| `dead-code-advanced.test.ts` | Type-only exports, conditional exports, tree-shaking scenarios                      |
+| `mixed-severity.test.ts`     | Project with both `error` and `warn` violations (exit code should be 1)             |
 
 #### Fixtures
 
@@ -381,8 +381,8 @@ tests/integration/fixtures/
 
 #### Integration Tests
 
-| File | Scenarios |
-|------|-----------|
+| File                  | Scenarios                                                                                              |
+| --------------------- | ------------------------------------------------------------------------------------------------------ |
 | `performance.test.ts` | Scan 1000+ files (< 10s), large file (10K+ lines), deep nesting (20+ levels), memory stays under 512MB |
 
 #### Fixtures
@@ -409,8 +409,8 @@ tests/integration/fixtures/
 
 #### Integration Tests
 
-| File | Scenarios |
-|------|-----------|
+| File               | Scenarios                                                                                                                    |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
 | `platform.test.ts` | Windows backslash normalization, case-insensitive filesystem behavior, symlink handling, long paths (Windows 260 char limit) |
 
 #### CI Matrix
@@ -431,9 +431,9 @@ strategy:
 
 #### Integration Tests
 
-| File | Scenarios |
-|------|-----------|
-| `vite-plugin-advanced.test.ts` | HMR triggers rescan, build fails on `severity: error`, plugin disabled via config, custom config path |
+| File                           | Scenarios                                                                                                     |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------- |
+| `vite-plugin-advanced.test.ts` | HMR triggers rescan, build fails on `severity: error`, plugin disabled via config, custom config path         |
 | `next-plugin-advanced.test.ts` | `NODE_ENV` behavior (dev vs prod), CI environment detection, `enabled: false` option, missing config fallback |
 
 ---
@@ -444,14 +444,14 @@ strategy:
 
 #### Unit Tests
 
-| File | Tests to Add |
-|------|--------------|
+| File                        | Tests to Add                                                                                            |
+| --------------------------- | ------------------------------------------------------------------------------------------------------- |
 | `import-resolution.test.ts` | tsconfig.json paths, scoped packages (`@scope/pkg`), package.json `exports` field, webpack/vite aliases |
 
 #### Integration Tests
 
-| File | Scenarios |
-|------|-----------|
+| File                     | Scenarios                                                              |
+| ------------------------ | ---------------------------------------------------------------------- |
 | `tsconfig-paths.test.ts` | Project with path aliases, baseUrl resolution, multiple tsconfig files |
 
 ---
@@ -462,25 +462,25 @@ strategy:
 
 #### Integration Tests
 
-| File | Scenarios |
-|------|-----------|
-| `cli-ux.test.ts` | Progress output for large scans, quiet mode (if implemented), JSON output to stdout |
-| `report-edge-cases.test.ts` | Report file overwrite behavior, directory creation, concurrent writes |
+| File                        | Scenarios                                                                           |
+| --------------------------- | ----------------------------------------------------------------------------------- |
+| `cli-ux.test.ts`            | Progress output for large scans, quiet mode (if implemented), JSON output to stdout |
+| `report-edge-cases.test.ts` | Report file overwrite behavior, directory creation, concurrent writes               |
 
 ---
 
 ### Implementation Summary
 
-| Phase | Priority | Effort | Files Added |
-|-------|----------|--------|-------------|
-| 1. Error Handling | Critical | 3-4 days | 3 unit, 2 integration, 2 fixtures |
-| 2. Edge Cases | High | 4-5 days | 6 unit updates, 2 integration, 3 fixtures |
-| 3. Advanced Rules | High | 3-4 days | 4 integration, 4 fixtures |
-| 4. Performance | Medium | 2-3 days | 1 integration, 2 fixtures (generated) |
-| 5. Platform | Medium | 2-3 days | 1 integration, CI matrix |
-| 6. Plugins | Medium | 2-3 days | 2 integration |
-| 7. Import Resolution | Low | 3-4 days | 1 unit, 1 integration |
-| 8. Polish | Low | 2-3 days | 2 integration |
+| Phase                | Priority | Effort   | Files Added                               |
+| -------------------- | -------- | -------- | ----------------------------------------- |
+| 1. Error Handling    | Critical | 3-4 days | 3 unit, 2 integration, 2 fixtures         |
+| 2. Edge Cases        | High     | 4-5 days | 6 unit updates, 2 integration, 3 fixtures |
+| 3. Advanced Rules    | High     | 3-4 days | 4 integration, 4 fixtures                 |
+| 4. Performance       | Medium   | 2-3 days | 1 integration, 2 fixtures (generated)     |
+| 5. Platform          | Medium   | 2-3 days | 1 integration, CI matrix                  |
+| 6. Plugins           | Medium   | 2-3 days | 2 integration                             |
+| 7. Import Resolution | Low      | 3-4 days | 1 unit, 1 integration                     |
+| 8. Polish            | Low      | 2-3 days | 2 integration                             |
 
 **Total Estimated Effort:** 22-29 days for full coverage
 
@@ -490,7 +490,7 @@ strategy:
 
 Before v1.0 release, the following must be true:
 
-- [ ] All Phase 1 (Error Handling) tests pass
+- [x] All Phase 1 (Error Handling) tests pass
 - [ ] All Phase 2 (Edge Cases) tests pass
 - [ ] All Phase 3 (Advanced Rules) tests pass
 - [ ] CI runs on Windows, macOS, and Linux

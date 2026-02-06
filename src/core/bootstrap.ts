@@ -23,11 +23,15 @@ export function createRunner(config: Config): Runner {
 // Load a puffin.json file, parse it, and validate against the config schema.
 // Returns a discriminated result so callers can handle errors in their own way.
 export function loadConfig(configPath: string):
-  | { success: true; data: Config }
-  | { success: false; error: string } {
+  | { success: true; data: Config; }
+  | { success: false; error: string; } {
   let raw = {};
-  if (existsSync(configPath)) {
-    raw = JSON.parse(readFileSync(configPath, 'utf-8'));
+  try {
+    if (existsSync(configPath)) {
+      raw = JSON.parse(readFileSync(configPath, 'utf-8'));
+    }
+  } catch (err: any) {
+    return { success: false, error: `Failed to load config file: ${err.message}` };
   }
   const result = ConfigSchema.safeParse(raw);
   if (!result.success) {

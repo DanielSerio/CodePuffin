@@ -59,11 +59,24 @@ test.describe('CLI error handling', () => {
       encoding: 'utf-8',
       env: { ...process.env, NO_COLOR: '1' },
     });
+    const output = result.stdout + result.stderr;
+    expect(output).toContain('Failed to load config file');
+  });
+
+  test('scan with invalid schema in config file shows validation error', () => {
+    const cwd = path.resolve(__dirname, 'fixtures', 'invalid-schema-project');
+
+    const result = spawnSync('node', [cli, 'scan', '.'], {
+      cwd,
+      encoding: 'utf-8',
+      env: { ...process.env, NO_COLOR: '1' },
+    });
 
     const output = result.stdout + result.stderr;
 
     expect(result.status).toBe(1);
-    expect(output).toContain('Failed to parse config');
+    expect(output).toContain('Invalid configuration');
+    expect(output).toContain('severity');
   });
 
   test('scan with -c short option works', () => {

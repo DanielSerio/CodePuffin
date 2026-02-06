@@ -1,0 +1,7 @@
+{
+  "rules": {
+    "line-limits": {
+      "severity": "super-error"
+    }
+  }
+}
