@@ -1,2 +1,7 @@
 node_modules
 dist
+
+#fixtures
+large-project
+deep-nesting-project
+huge-file-project
