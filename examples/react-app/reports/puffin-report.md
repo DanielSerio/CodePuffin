@@ -5,7 +5,7 @@ You are an AI developer tasked with resolving architectural and style violations
 
 ### 📂 Project Context
 - **Root Directory**: `C:/developer/code-scanner/examples/react-app`
-- **Scan Date**: 2/7/2026, 11:19:44 AM
+- **Scan Date**: 2/7/2026, 11:48:08 AM
 
 ### 📊 Summary
 **Total Issues**: 1

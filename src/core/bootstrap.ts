@@ -115,10 +115,7 @@ export async function scan(root: string, configPath: string, options: ScanOption
 
     // Merge: fresh results for dirty files + cached results for clean files
     const cleanFiles = context.allFiles.filter(f => !dirtySet.has(f));
-    const cachedResults: RuleResult[] = [];
-    for (const f of cleanFiles) {
-      cachedResults.push(...cache.getCachedResultsForFile(f));
-    }
+    const cachedResults = cleanFiles.flatMap(f => cache.getCachedResultsForFile(f));
 
     results = [...freshResults, ...cachedResults];
   } else {

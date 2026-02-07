@@ -1,15 +1,15 @@
 {
-  "version": "2.0.0",
+  "version": "2.1.0",
   "configHash": "",
   "files": {
-    "C:/developer/code-scanner/tests/integration/fixtures/next-advanced-project/src/features/auth/index.ts": {
+    "src/features/auth/index.ts": {
       "hash": "761cbc9577580120b49f461e3617d0c4cddc9123e4e95ff5bc44c7e3d5df9cd9",
       "mtime": 1770413126149.204,
       "imports": [
-        "C:/developer/code-scanner/tests/integration/fixtures/next-advanced-project/src/features/user/index.ts"
+        "src/features/user/index.ts"
       ]
     },
-    "C:/developer/code-scanner/tests/integration/fixtures/next-advanced-project/src/features/user/index.ts": {
+    "src/features/user/index.ts": {
       "hash": "696a67337e3d427b1fdf2f9fc3617c0dc8877e44622e01cb0f474b67111c3f20",
       "mtime": 1770413128087.305,
       "imports": []

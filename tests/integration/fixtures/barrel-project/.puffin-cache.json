@@ -1,41 +1,41 @@
 {
-  "version": "2.0.0",
+  "version": "2.1.0",
   "configHash": "b16a5c77ee6fdcce42b6d66eb8fadb780b6a42560f03581f2046a0b1e9513501",
   "files": {
-    "C:/developer/code-scanner/tests/integration/fixtures/barrel-project/src/a/a.ts": {
+    "src/a/a.ts": {
       "hash": "ce8d4df9dd1fbb4accdc20fb487240c9fb271206fdeee712a9fff92f140b9322",
       "mtime": 1770409030890.9253,
       "imports": [
-        "C:/developer/code-scanner/tests/integration/fixtures/barrel-project/src/b/index.ts"
+        "src/b/index.ts"
       ]
     },
-    "C:/developer/code-scanner/tests/integration/fixtures/barrel-project/src/a/index.ts": {
+    "src/a/index.ts": {
       "hash": "81bb40dad4e6194fbc36ff1694d63284f5dfb415ac771732baf51c9c20c6eda6",
       "mtime": 1770409026689.7012,
       "imports": [
-        "C:/developer/code-scanner/tests/integration/fixtures/barrel-project/src/a/a.ts"
+        "src/a/a.ts"
       ]
     },
-    "C:/developer/code-scanner/tests/integration/fixtures/barrel-project/src/b/b.ts": {
+    "src/b/b.ts": {
       "hash": "15bde3b12af2dd03b4551c03596008dafccfbe82fdd7f72df276e47cf9f090b7",
       "mtime": 1770409039358.1482,
       "imports": [
-        "C:/developer/code-scanner/tests/integration/fixtures/barrel-project/src/a/index.ts"
+        "src/a/index.ts"
       ]
     },
-    "C:/developer/code-scanner/tests/integration/fixtures/barrel-project/src/b/index.ts": {
+    "src/b/index.ts": {
       "hash": "910c4e93f8765c06f1053521c13768426acea32708dd79abab4f82cda7f54d8a",
       "mtime": 1770409035137.6738,
       "imports": [
-        "C:/developer/code-scanner/tests/integration/fixtures/barrel-project/src/b/b.ts"
+        "src/b/b.ts"
       ]
     }
   },
   "results": {
-    "C:/developer/code-scanner/tests/integration/fixtures/barrel-project/src/a/a.ts": [
+    "src/a/a.ts": [
       {
         "ruleId": "circular-dependencies",
-        "file": "C:/developer/code-scanner/tests/integration/fixtures/barrel-project/src/a/a.ts",
+        "file": "src/a/a.ts",
         "message": "Circular dependency detected: src/a/a.ts -> src/b/index.ts -> src/b/b.ts -> src/a/index.ts -> src/a/a.ts",
         "severity": "error",
         "suggestion": "Break the cycle by extracting shared code into a separate module or using dependency injection"
