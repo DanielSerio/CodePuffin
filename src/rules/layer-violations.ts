@@ -31,7 +31,7 @@ export class LayerViolationsRule implements Rule {
     const modulePatterns = context.config.modules || {};
     const { severity, allowed } = config;
     const results: RuleResult[] = [];
-    const knownFiles = new Set(context.files.map(f => f.replace(/\\/g, '/')));
+    const knownFiles = new Set(context.allFiles.map(f => f.replace(/\\/g, '/')));
 
     // Use centralized modules as layers
     const layerEntries = Object.entries(modulePatterns).map(([name, pattern]) => ({ name, pattern }));

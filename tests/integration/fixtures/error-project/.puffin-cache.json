@@ -1,5 +1,6 @@
 {
-  "version": "1.1.0",
+  "version": "2.0.0",
+  "configHash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
   "files": {
     "C:/developer/code-scanner/tests/integration/fixtures/error-project/src/unparseable.ts": {
       "hash": "0d11034341c582cab706fbe34177f9ce3742ffeb641d24278a705456d92dcada",
@@ -11,5 +12,6 @@
       "mtime": 1770403859286.4888,
       "imports": []
     }
-  }
+  },
+  "results": {}
 }

@@ -1,5 +1,6 @@
 {
-  "version": "1.1.0",
+  "version": "2.0.0",
+  "configHash": "",
   "files": {
     "C:/developer/code-scanner/examples/react-app/src/App.tsx": {
       "hash": "3bcd693f7cd99c70c81e6858b25702d213e47bf2a81240f0c3870afbe41a8ff2",
@@ -46,5 +47,6 @@
         "C:/developer/code-scanner/examples/react-app/src/components/Button.tsx"
       ]
     }
-  }
+  },
+  "results": {}
 }

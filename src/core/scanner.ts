@@ -20,9 +20,10 @@ export function isSourceFile(filePath: string): boolean {
 export interface ScanContext {
   root: string;
   config: Config;
-  files: string[];
+  files: string[];       // Files to analyze (dirty files in incremental mode, all files in full mode)
+  allFiles: string[];    // All discovered project files (always the full set, for import resolution)
   modules: Record<string, string[]>;
-  dirtyFiles: string[]; // Files that have changed (or been affected by changes) since the last scan
+  dirtyFiles: string[];  // Files that have changed (or been affected by changes) since the last scan
 }
 
 export class Scanner {
@@ -113,14 +114,20 @@ export class Scanner {
     }));
 
     this.cache.prune(files);
+    this.cache.pruneResults(files);
     this.cache.saveCache();
 
     return {
       root: this.root,
       config: this.config,
       files,
+      allFiles: files,
       modules,
       dirtyFiles,
     };
+  }
+
+  getCacheService(): CacheService {
+    return this.cache;
   }
 }

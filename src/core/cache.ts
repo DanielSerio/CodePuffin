@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
+import { RuleResult } from './rules';
 
 export interface CacheEntry {
   hash: string;
@@ -10,11 +11,13 @@ export interface CacheEntry {
 
 export interface PuffinCache {
   version: string;
+  configHash: string; // Hash of the rule configuration to detect config changes
   files: Record<string, CacheEntry>;
+  results: Record<string, RuleResult[]>; // Cached rule results per file path
 }
 
 const CACHE_FILE_NAME = '.puffin-cache.json';
-const CURRENT_VERSION = '1.1.0';
+const CURRENT_VERSION = '2.0.0';
 
 export class CacheService {
   private cachePath: string;
@@ -37,7 +40,7 @@ export class CacheService {
     } catch (e) {
       // Ignore cache load errors
     }
-    return { version: CURRENT_VERSION, files: {} };
+    return { version: CURRENT_VERSION, configHash: '', files: {}, results: {} };
   }
 
   private hasChanges = false;
@@ -130,8 +133,84 @@ export class CacheService {
     return true;
   }
 
+  // --- Result Caching ---
+
   /**
-   * Calculates the full list of "dirty" files, including those affected by 
+   * Returns the cached config hash, or empty string if not set.
+   */
+  getConfigHash(): string {
+    return this.cache.configHash || '';
+  }
+
+  /**
+   * Sets the config hash in the cache.
+   */
+  setConfigHash(hash: string): void {
+    if (this.cache.configHash !== hash) {
+      this.cache.configHash = hash;
+      this.hasChanges = true;
+    }
+  }
+
+  /**
+   * Stores rule results for a given file.
+   */
+  setCachedResultsForFile(filePath: string, results: RuleResult[]): void {
+    this.cache.results[filePath] = results;
+    this.hasChanges = true;
+  }
+
+  /**
+   * Returns cached rule results for a given file, or empty array if none.
+   */
+  getCachedResultsForFile(filePath: string): RuleResult[] {
+    return this.cache.results[filePath] || [];
+  }
+
+  /**
+   * Returns all cached results across all files.
+   */
+  getAllCachedResults(): RuleResult[] {
+    return Object.values(this.cache.results).flat();
+  }
+
+  /**
+   * Clears cached results for the given files.
+   */
+  clearResultsForFiles(filePaths: string[]): void {
+    for (const f of filePaths) {
+      if (this.cache.results[f]) {
+        delete this.cache.results[f];
+        this.hasChanges = true;
+      }
+    }
+  }
+
+  /**
+   * Clears all cached results (used on config change or --clean).
+   */
+  clearAllResults(): void {
+    if (Object.keys(this.cache.results).length > 0) {
+      this.cache.results = {};
+      this.hasChanges = true;
+    }
+  }
+
+  /**
+   * Prunes cached results for files that no longer exist in the project.
+   */
+  pruneResults(validFiles: string[]): void {
+    const validSet = new Set(validFiles);
+    for (const cachedPath of Object.keys(this.cache.results)) {
+      if (!validSet.has(cachedPath)) {
+        delete this.cache.results[cachedPath];
+        this.hasChanges = true;
+      }
+    }
+  }
+
+  /**
+   * Calculates the full list of "dirty" files, including those affected by
    * changes in their dependencies (the blast radius).
    */
   getDirtyWithDependents(dirtyFiles: string[]): string[] {

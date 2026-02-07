@@ -1,5 +1,6 @@
 {
-  "version": "1.1.0",
+  "version": "2.0.0",
+  "configHash": "7ec78a82c5aa5549a64907750c31136c52f6d2a0e22392bfc341ed0500b4a0a3",
   "files": {
     "C:/developer/code-scanner/tests/integration/fixtures/unicode-project/src/file with spaces.ts": {
       "hash": "e6dc6f7e13317a5909bba311578639b18c2b646f947ba1f33557cc2caba3195d",
@@ -11,5 +12,6 @@
       "mtime": 1770408707185.7603,
       "imports": []
     }
-  }
+  },
+  "results": {}
 }

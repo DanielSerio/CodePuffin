@@ -18,7 +18,9 @@ const mockContext: ScanContext = {
     output: { format: 'stylish' }
   },
   files: ['/project/src/file.ts', '/project/src/other.ts'],
-  modules: {}
+  allFiles: ['/project/src/file.ts', '/project/src/other.ts'],
+  modules: {},
+  dirtyFiles: [],
 };
 
 function makeResult(overrides: Partial<RuleResult> = {}): RuleResult {

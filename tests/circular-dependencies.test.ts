@@ -66,6 +66,7 @@ describe('buildImportGraph', () => {
     const mockContext = {
       root: getPath('/root'),
       files: [fileA, fileB],
+      allFiles: [fileA, fileB],
       config: { project: { aliases: {} } }
     } as any;
 
@@ -87,6 +88,7 @@ describe('buildImportGraph', () => {
     const mockContext = {
       root: getPath('/root'),
       files: [fileA, fileB],
+      allFiles: [fileA, fileB],
       config: { project: { aliases: {} } }
     } as any;
 
@@ -109,6 +111,8 @@ describe('CircularDependenciesRule', () => {
     const context: ScanContext = {
       root: getPath('/root'),
       files: [fileA, fileB],
+      allFiles: [fileA, fileB],
+      dirtyFiles: [],
       config: {
         rules: {
           'circular-dependencies': {
@@ -140,6 +144,8 @@ describe('CircularDependenciesRule', () => {
     const context: ScanContext = {
       root: getPath('/root'),
       files: [fileA, fileB, fileC],
+      allFiles: [fileA, fileB, fileC],
+      dirtyFiles: [],
       config: {
         rules: {
           'circular-dependencies': {

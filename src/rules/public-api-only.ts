@@ -87,7 +87,7 @@ export class PublicApiOnlyRule implements Rule {
     const modulePatterns = inputPatterns.map(p => resolvePattern(p, globalModules));
 
     const results: RuleResult[] = [];
-    const knownFiles = new Set(context.files.map(f => f.replace(/\\/g, '/')));
+    const knownFiles = new Set(context.allFiles.map(f => f.replace(/\\/g, '/')));
 
     for (const filePath of context.files) {
       if (!isSourceCodeFile(filePath)) continue;

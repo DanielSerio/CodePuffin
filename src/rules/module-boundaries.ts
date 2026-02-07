@@ -13,7 +13,7 @@ export class ModuleBoundariesRule implements Rule {
     const modulePatterns = context.config.modules || {};
     const { severity, rules: boundaryRules } = config;
     const results: RuleResult[] = [];
-    const knownFiles = new Set(context.files.map(f => f.replace(/\\/g, '/')));
+    const knownFiles = new Set(context.allFiles.map(f => f.replace(/\\/g, '/')));
 
     // Convert Record<string, string> to { name, pattern }[] for matchFileToPattern
     const moduleEntries = Object.entries(modulePatterns).map(([name, pattern]) => ({ name, pattern }));

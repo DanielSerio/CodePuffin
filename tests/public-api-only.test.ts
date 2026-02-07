@@ -19,6 +19,8 @@ describe('PublicApiOnlyRule', () => {
     const context: ScanContext = {
       root: '/root',
       files: ['/root/src/app.ts', '/root/src/features/auth/internal/secret.ts'],
+      allFiles: ['/root/src/app.ts', '/root/src/features/auth/internal/secret.ts'],
+      dirtyFiles: [],
       modules: {},
       config: {
         rules: {
@@ -50,6 +52,8 @@ describe('PublicApiOnlyRule', () => {
     const context: ScanContext = {
       root: '/root',
       files: ['/root/src/app.ts', '/root/src/features/auth/index.ts'],
+      allFiles: ['/root/src/app.ts', '/root/src/features/auth/index.ts'],
+      dirtyFiles: [],
       modules: {},
       config: {
         rules: {
@@ -77,6 +81,11 @@ describe('PublicApiOnlyRule', () => {
         '/root/src/features/auth/ui/LoginForm.tsx',
         '/root/src/features/auth/internal/crypto.ts'
       ],
+      allFiles: [
+        '/root/src/features/auth/ui/LoginForm.tsx',
+        '/root/src/features/auth/internal/crypto.ts'
+      ],
+      dirtyFiles: [],
       modules: {},
       config: {
         rules: {

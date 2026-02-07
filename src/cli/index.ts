@@ -1,10 +1,10 @@
 import { Command } from 'commander';
 import pc from 'picocolors';
 import path from 'path';
-import { Scanner } from '../core/scanner';
 import { RuleResult } from '../core/rules';
 import { reportStylish, writeReportFile } from '../core/reporter';
-import { loadConfig, createRunner } from '../core/bootstrap';
+import { loadConfig, createRunner, scan } from '../core/bootstrap';
+import { Scanner } from '../core/scanner';
 
 const program = new Command();
 
@@ -13,14 +13,19 @@ program
   .description('High-performance static analysis tool for architectural enforcement')
   .version('1.0.0');
 
-interface ScanOptions {
+interface CliScanOptions {
   config: string;
+  clean?: boolean;
 }
 
-async function runScan(directory: string, options: ScanOptions) {
+async function runScan(directory: string, options: CliScanOptions) {
   const configPath = path.resolve(process.cwd(), options.config);
 
   console.log(pc.blue(`\n🚀 Starting scan in ${pc.bold(directory)}...`));
+
+  if (options.clean) {
+    console.log(pc.gray(`🧹 Clean mode: ignoring cached results.`));
+  }
 
   let loaded;
   try {
@@ -38,22 +43,22 @@ async function runScan(directory: string, options: ScanOptions) {
 
   console.log(pc.green(`✔ Loaded config from ${pc.bold(options.config)}`));
 
-  const validatedConfig = loaded.data;
-  const scanner = new Scanner(directory, validatedConfig);
-  const context = await scanner.createContext();
+  // Use the scan pipeline which handles incremental result merging
+  const { config, results, fileCount, modules, context } = await scan(
+    directory,
+    configPath,
+    { clean: options.clean },
+  );
 
-  console.log(pc.gray(`\n📂 Discovered ${pc.white(context.files.length)} files.`));
+  console.log(pc.gray(`\n📂 Discovered ${pc.white(fileCount)} files.`));
 
-  const moduleCount = Object.keys(context.modules).length;
+  const moduleCount = Object.keys(modules).length;
   if (moduleCount > 0) {
     console.log(pc.gray(`📦 Resolved ${pc.white(moduleCount)} modules:`));
-    for (const name of Object.keys(context.modules)) {
-      console.log(pc.gray(`   - ${name} (${context.modules[name].length} files)`));
+    for (const name of Object.keys(modules)) {
+      console.log(pc.gray(`   - ${name} (${modules[name].length} files)`));
     }
   }
-
-  const runner = createRunner(validatedConfig);
-  const results = await runner.run(context);
 
   // Always print stylish output to the console
   reportStylish(results, context.root);
@@ -74,7 +79,8 @@ program
   .description('Scan the codebase for architectural issues')
   .argument('[directory]', 'directory to scan', '.')
   .option('-c, --config <path>', 'path to configuration file', 'puffin.json')
-  .action((directory: string, options: ScanOptions) => {
+  .option('--clean', 'force a full re-scan, ignoring cached results')
+  .action((directory: string, options: CliScanOptions) => {
     runScan(directory, options).catch((err: Error) => {
       console.error(pc.red(`\n✖ ${err.message}`));
       process.exit(1);
