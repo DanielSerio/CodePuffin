@@ -1,21 +1,33 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "files": {
     "C:/developer/code-scanner/tests/integration/fixtures/barrel-project/src/a/a.ts": {
       "hash": "ce8d4df9dd1fbb4accdc20fb487240c9fb271206fdeee712a9fff92f140b9322",
-      "mtime": 1770409030890.9253
+      "mtime": 1770409030890.9253,
+      "imports": [
+        "C:/developer/code-scanner/tests/integration/fixtures/barrel-project/src/b/index.ts"
+      ]
     },
     "C:/developer/code-scanner/tests/integration/fixtures/barrel-project/src/a/index.ts": {
       "hash": "81bb40dad4e6194fbc36ff1694d63284f5dfb415ac771732baf51c9c20c6eda6",
-      "mtime": 1770409026689.7012
+      "mtime": 1770409026689.7012,
+      "imports": [
+        "C:/developer/code-scanner/tests/integration/fixtures/barrel-project/src/a/a.ts"
+      ]
     },
     "C:/developer/code-scanner/tests/integration/fixtures/barrel-project/src/b/b.ts": {
       "hash": "15bde3b12af2dd03b4551c03596008dafccfbe82fdd7f72df276e47cf9f090b7",
-      "mtime": 1770409039358.1482
+      "mtime": 1770409039358.1482,
+      "imports": [
+        "C:/developer/code-scanner/tests/integration/fixtures/barrel-project/src/a/index.ts"
+      ]
     },
     "C:/developer/code-scanner/tests/integration/fixtures/barrel-project/src/b/index.ts": {
       "hash": "910c4e93f8765c06f1053521c13768426acea32708dd79abab4f82cda7f54d8a",
-      "mtime": 1770409035137.6738
+      "mtime": 1770409035137.6738,
+      "imports": [
+        "C:/developer/code-scanner/tests/integration/fixtures/barrel-project/src/b/b.ts"
+      ]
     }
   }
 }

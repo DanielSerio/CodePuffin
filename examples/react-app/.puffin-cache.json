@@ -1,33 +1,50 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "files": {
     "C:/developer/code-scanner/examples/react-app/src/App.tsx": {
       "hash": "3bcd693f7cd99c70c81e6858b25702d213e47bf2a81240f0c3870afbe41a8ff2",
-      "mtime": 1770469627051.755
+      "mtime": 1770469627051.755,
+      "imports": [
+        "C:/developer/code-scanner/examples/react-app/src/routes/Page.tsx"
+      ]
     },
     "C:/developer/code-scanner/examples/react-app/src/main.tsx": {
       "hash": "2e2240a86194df0abbeed145dd76fde14f4cc501fca056e4c8aaead8dc4fc3bc",
-      "mtime": 1770469472781.9543
+      "mtime": 1770469472781.9543,
+      "imports": [
+        "C:/developer/code-scanner/examples/react-app/src/App.tsx"
+      ]
     },
     "C:/developer/code-scanner/examples/react-app/src/components/Button.tsx": {
       "hash": "ae5450a779c5f77ba5c7ceac6eb31f06bab220ae2192e1e268de2abcdff35e95",
-      "mtime": 1770469517612.9946
+      "mtime": 1770469517612.9946,
+      "imports": []
     },
     "C:/developer/code-scanner/examples/react-app/src/components/TestComponent.tsx": {
       "hash": "f011eebe11100e5e74ead3909b15fa7742601c0030483bbb6caee2523a1293eb",
-      "mtime": 1770469885323.0696
+      "mtime": 1770469885323.0696,
+      "imports": []
     },
     "C:/developer/code-scanner/examples/react-app/src/routes/Page.tsx": {
       "hash": "04afd17d7fb84c5f2756aae05ff50fd9bf6aef0a1d34fbfb699a78bb3cccdd4c",
-      "mtime": 1770469562786.433
+      "mtime": 1770469562786.433,
+      "imports": [
+        "C:/developer/code-scanner/examples/react-app/src/features/home/pages/HomePage.tsx"
+      ]
     },
     "C:/developer/code-scanner/examples/react-app/src/routes/PageTwo.tsx": {
       "hash": "247dbadbdb4467c575bb7c164833b395086f86be960e608f25930296d4ffc0f5",
-      "mtime": 1770469939492.1946
+      "mtime": 1770469939492.1946,
+      "imports": [
+        "C:/developer/code-scanner/examples/react-app/src/components/TestComponent.tsx"
+      ]
     },
     "C:/developer/code-scanner/examples/react-app/src/features/home/pages/HomePage.tsx": {
       "hash": "6474c8d7f66a88dcbe7ba23034d61aa00d3639410794f03d5806395f8b7026a4",
-      "mtime": 1770469543700.618
+      "mtime": 1770469543700.618,
+      "imports": [
+        "C:/developer/code-scanner/examples/react-app/src/components/Button.tsx"
+      ]
     }
   }
 }

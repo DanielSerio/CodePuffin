@@ -76,4 +76,55 @@ describe('Incremental Scanning - Phase 1: Hashing & Persistence', () => {
     expect(context2.dirtyFiles).toContain(file1);
     expect(context2.dirtyFiles).not.toContain(file2);
   });
+
+  describe('Phase 2: Blast Radius (The Dependency Ripple)', () => {
+    it('🔴 RED: marks dependents of dirty files as dirty', async () => {
+      const parent = path.resolve('/project/src/parent.ts').replace(/\\/g, '/');
+      const child = path.resolve('/project/src/child.ts').replace(/\\/g, '/');
+
+      const cacheStorage = new Map<string, string>();
+      vi.mocked(fs.existsSync).mockImplementation((p) => cacheStorage.has(p as string));
+      vi.mocked(fs.writeFileSync).mockImplementation((p, data) => cacheStorage.set(p as string, data as string));
+
+      // We need to mock dependency resolution
+      // Let's assume child imports parent
+      vi.mocked(fg).mockResolvedValue([parent, child]);
+      vi.mocked(fs.readFileSync).mockImplementation((p) => {
+        const s = p as string;
+        if (s === cachePath) return cacheStorage.get(s) || '';
+        if (s === child) return "import { something } from './parent'";
+        return "export const something = 1";
+      });
+      vi.mocked(fs.statSync).mockImplementation(() => ({ mtimeMs: 1000 } as any));
+
+      // 1. Initial Scan (builds the graph)
+      const scanner1 = new Scanner(root, config);
+      await scanner1.createContext();
+
+      // 2. Mock a change in 'parent.ts'
+      vi.mocked(fs.readFileSync).mockImplementation((p) => {
+        const s = p as string;
+        if (s === cachePath) return cacheStorage.get(s) || '';
+        if (s === parent) return "export const something = 2"; // Content change
+        if (s === child) return "import { something } from './parent'"; // Unchanged
+        return "";
+      });
+      vi.mocked(fs.statSync).mockImplementation((p) => {
+        const s = p as string;
+        if (s === parent) return { mtimeMs: 2000 } as any; // mtime change
+        return { mtimeMs: 1000 } as any;
+      });
+
+      // 3. Second Scan (Incremental)
+      const scanner2 = new Scanner(root, config);
+      const context2 = await scanner2.createContext();
+
+      // Parent is dirty because it changed
+      expect(context2.dirtyFiles).toContain(parent);
+
+      // Child MUST be dirty because parent changed, even if child's hash is the same
+      // This will FAIL initially as Blast Radius is not implemented
+      expect(context2.dirtyFiles).toContain(child);
+    });
+  });
 });

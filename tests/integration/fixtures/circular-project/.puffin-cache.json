@@ -1,13 +1,19 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "files": {
     "C:/developer/code-scanner/tests/integration/fixtures/circular-project/src/a.ts": {
       "hash": "9f5d5f83d2f8a651a23e954fe94f4de3d5a62bb3a0e4986ce5c7b41f59ab73e7",
-      "mtime": 1770398971294.47
+      "mtime": 1770398971294.47,
+      "imports": [
+        "C:/developer/code-scanner/tests/integration/fixtures/circular-project/src/b.ts"
+      ]
     },
     "C:/developer/code-scanner/tests/integration/fixtures/circular-project/src/b.ts": {
       "hash": "ed344d22d3a19861641767c8630aa5b5cf77c6304253d85558f3beac48a7d921",
-      "mtime": 1770398976565.6758
+      "mtime": 1770398976565.6758,
+      "imports": [
+        "C:/developer/code-scanner/tests/integration/fixtures/circular-project/src/a.ts"
+      ]
     }
   }
 }

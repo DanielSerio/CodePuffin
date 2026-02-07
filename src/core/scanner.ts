@@ -2,6 +2,7 @@ import fg from 'fast-glob';
 import path from 'path';
 import { Config } from './config';
 import { CacheService } from './cache';
+import { extractImports, resolveImport } from '../utils/imports';
 
 // Only scan text-based source files; skip binaries, images, fonts, etc.
 const SOURCE_EXTENSIONS = new Set([
@@ -21,7 +22,7 @@ export interface ScanContext {
   config: Config;
   files: string[];
   modules: Record<string, string[]>;
-  dirtyFiles: string[]; // Files that have changed since the last scan
+  dirtyFiles: string[]; // Files that have changed (or been affected by changes) since the last scan
 }
 
 export class Scanner {
@@ -60,6 +61,7 @@ export class Scanner {
     });
     // Normalize discovered files to use forward slashes internally
     const files = allFiles.map(f => f.replace(/\\/g, '/')).filter(isSourceFile);
+    const knownFiles = new Set(files);
 
     // 2. Resolve modules
     const modules: Record<string, string[]> = {};
@@ -81,13 +83,35 @@ export class Scanner {
       }
     }
 
-    // 3. Detect dirty files
-    const dirtyFiles: string[] = [];
+    // 3. Detect direct dirty files
+    const directDirty: string[] = [];
     for (const f of files) {
       if (this.cache.isDirty(f)) {
-        dirtyFiles.push(f);
+        directDirty.push(f);
       }
     }
+
+    // 4. Resolve blast radius (dependents of dirty files)
+    const dirtyFiles = this.cache.getDirtyWithDependents(directDirty);
+
+    // 5. Update imports for dirty files
+    await Promise.all(directDirty.map(async (f) => {
+      try {
+        const rawImports = extractImports(f, this.root);
+        const resolved = rawImports.map(i => resolveImport(
+          i.specifier,
+          f,
+          knownFiles,
+          this.root,
+          this.config.project?.aliases
+        )).filter((r): r is string => !!r);
+
+        this.cache.updateImports(f, resolved);
+      } catch (e) {
+        // Skip files that fail to parse
+      }
+    }));
+
     this.cache.prune(files);
     this.cache.saveCache();
 

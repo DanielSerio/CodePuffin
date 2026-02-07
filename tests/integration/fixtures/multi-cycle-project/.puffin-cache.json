@@ -1,33 +1,56 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "files": {
     "C:/developer/code-scanner/tests/integration/fixtures/multi-cycle-project/src/a.ts": {
       "hash": "fcb06980848349671f98e409addf990ae0c91ea610e03bd30a0eb30e5a94d5af",
-      "mtime": 1770409139324.9812
+      "mtime": 1770409139324.9812,
+      "imports": [
+        "C:/developer/code-scanner/tests/integration/fixtures/multi-cycle-project/src/b.ts"
+      ]
     },
     "C:/developer/code-scanner/tests/integration/fixtures/multi-cycle-project/src/b.ts": {
       "hash": "02cd280b394dfc13148048f607df090a2f6075082d8a9fa05d59d7aabe293505",
-      "mtime": 1770409142923.2014
+      "mtime": 1770409142923.2014,
+      "imports": [
+        "C:/developer/code-scanner/tests/integration/fixtures/multi-cycle-project/src/a.ts"
+      ]
     },
     "C:/developer/code-scanner/tests/integration/fixtures/multi-cycle-project/src/c.ts": {
       "hash": "9b540bbaa265bd9b3e44cb925954428070dfe56f9d99b90d9c536f086764437d",
-      "mtime": 1770409147122.2017
+      "mtime": 1770409147122.2017,
+      "imports": [
+        "C:/developer/code-scanner/tests/integration/fixtures/multi-cycle-project/src/d.ts"
+      ]
     },
     "C:/developer/code-scanner/tests/integration/fixtures/multi-cycle-project/src/d.ts": {
       "hash": "01d8717bb4a95baef3bfa1b854c408f9b5c9b0f9ef56b55a87dde79a857508bc",
-      "mtime": 1770409151009.3748
+      "mtime": 1770409151009.3748,
+      "imports": [
+        "C:/developer/code-scanner/tests/integration/fixtures/multi-cycle-project/src/e.ts"
+      ]
     },
     "C:/developer/code-scanner/tests/integration/fixtures/multi-cycle-project/src/e.ts": {
       "hash": "65f07b95c1081aa6b3ca82396555e15e674ee17163d519f6060e10d729f101c5",
-      "mtime": 1770409154946.9639
+      "mtime": 1770409154946.9639,
+      "imports": [
+        "C:/developer/code-scanner/tests/integration/fixtures/multi-cycle-project/src/c.ts"
+      ]
     },
     "C:/developer/code-scanner/tests/integration/fixtures/multi-cycle-project/src/f.ts": {
       "hash": "8a7ba32540df82ad44b9baba7999e951765dc034c72f4bdca382f47f0db81fc7",
-      "mtime": 1770409159424.5244
+      "mtime": 1770409159424.5244,
+      "imports": [
+        "C:/developer/code-scanner/tests/integration/fixtures/multi-cycle-project/src/f.ts"
+      ]
     },
     "C:/developer/code-scanner/tests/integration/fixtures/multi-cycle-project/src/main.ts": {
       "hash": "906f8acbde203022f9ef83b875df4248e24d4b5a2f5bf428091f4d3a402a2428",
-      "mtime": 1770409134920.1553
+      "mtime": 1770409134920.1553,
+      "imports": [
+        "C:/developer/code-scanner/tests/integration/fixtures/multi-cycle-project/src/b.ts",
+        "C:/developer/code-scanner/tests/integration/fixtures/multi-cycle-project/src/d.ts",
+        "C:/developer/code-scanner/tests/integration/fixtures/multi-cycle-project/src/f.ts"
+      ]
     }
   }
 }
