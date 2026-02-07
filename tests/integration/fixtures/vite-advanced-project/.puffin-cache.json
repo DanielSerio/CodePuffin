@@ -1,0 +1,21 @@
+{
+  "version": "1.0.0",
+  "files": {
+    "C:/developer/code-scanner/tests/integration/fixtures/vite-advanced-project/src/main.ts": {
+      "hash": "021c2c62f37b47f286db5d67c36f65e5ddbdb5c1b302cdbc06ff749c0d723f2e",
+      "mtime": 1770413081031.0825
+    },
+    "C:/developer/code-scanner/tests/integration/fixtures/vite-advanced-project/src/shared/utils.ts": {
+      "hash": "9ce75f27101ac0e1f4fdc6aac3091985c3b389137f8fc3c2634409c9afcc35dd",
+      "mtime": 1770413078954.6375
+    },
+    "C:/developer/code-scanner/tests/integration/fixtures/vite-advanced-project/src/features/auth/index.ts": {
+      "hash": "761cbc9577580120b49f461e3617d0c4cddc9123e4e95ff5bc44c7e3d5df9cd9",
+      "mtime": 1770413074974.235
+    },
+    "C:/developer/code-scanner/tests/integration/fixtures/vite-advanced-project/src/features/user/index.ts": {
+      "hash": "696a67337e3d427b1fdf2f9fc3617c0dc8877e44622e01cb0f474b67111c3f20",
+      "mtime": 1770413077030.8503
+    }
+  }
+}

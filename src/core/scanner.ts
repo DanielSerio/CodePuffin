@@ -1,6 +1,7 @@
 import fg from 'fast-glob';
 import path from 'path';
 import { Config } from './config';
+import { CacheService } from './cache';
 
 // Only scan text-based source files; skip binaries, images, fonts, etc.
 const SOURCE_EXTENSIONS = new Set([
@@ -20,16 +21,19 @@ export interface ScanContext {
   config: Config;
   files: string[];
   modules: Record<string, string[]>;
+  dirtyFiles: string[]; // Files that have changed since the last scan
 }
 
 export class Scanner {
   private root: string;
   private config: Config;
+  private cache: CacheService;
 
   constructor(root: string, config: Config) {
     // Normalize root to forward slashes to match discovered file paths
     this.root = path.resolve(root).replace(/\\/g, '/');
     this.config = config;
+    this.cache = new CacheService(this.root);
   }
 
   async createContext(): Promise<ScanContext> {
@@ -77,12 +81,22 @@ export class Scanner {
       }
     }
 
+    // 3. Detect dirty files
+    const dirtyFiles: string[] = [];
+    for (const f of files) {
+      if (this.cache.isDirty(f)) {
+        dirtyFiles.push(f);
+      }
+    }
+    this.cache.prune(files);
+    this.cache.saveCache();
+
     return {
       root: this.root,
       config: this.config,
       files,
       modules,
+      dirtyFiles,
     };
   }
-
 }

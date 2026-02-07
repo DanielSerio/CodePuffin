@@ -1,0 +1,9 @@
+{
+  "version": "1.0.0",
+  "files": {
+    "C:/developer/code-scanner/tests/integration/fixtures/platform-project/SRC/nested/deep/path/that/is/really/quite/long/to/test/windows/limit/if/possible/without/breaking/things/too/much/in/the/environment/since/some/tools/might/choke/on/it/but/we/want/to/be/brave/and/see/how/it/goes/for/puffin/detection/logic/and/filesystem/scanning/capabilities/deep.ts": {
+      "hash": "7e49e98415dc5fdf61a623937a8b804d501720792566fd187b70d41bedbd4e0b",
+      "mtime": 1770409869663.9536
+    }
+  }
+}

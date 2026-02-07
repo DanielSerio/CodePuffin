@@ -1,0 +1,13 @@
+{
+  "version": "1.0.0",
+  "files": {
+    "C:/developer/code-scanner/tests/integration/fixtures/next-project/src/helper.ts": {
+      "hash": "35d354e9040d3d1e7c756a0b2d3107f4c3fa9e20f7f20db1a752c6a9b777730d",
+      "mtime": 1770413277992.8972
+    },
+    "C:/developer/code-scanner/tests/integration/fixtures/next-project/src/main.ts": {
+      "hash": "86cc433cc112f964463a090d142b6c3cf9066d1d6b715cc309f7beb0daf9d29f",
+      "mtime": 1770413275835.6921
+    }
+  }
+}

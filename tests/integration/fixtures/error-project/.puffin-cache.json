@@ -1,0 +1,13 @@
+{
+  "version": "1.0.0",
+  "files": {
+    "C:/developer/code-scanner/tests/integration/fixtures/error-project/src/unparseable.ts": {
+      "hash": "0d11034341c582cab706fbe34177f9ce3742ffeb641d24278a705456d92dcada",
+      "mtime": 1770403861281.6995
+    },
+    "C:/developer/code-scanner/tests/integration/fixtures/error-project/src/valid.ts": {
+      "hash": "43b7f44d7cb96ead49a66e0b9bfe369ddc98b5d01507b8155e072fa74383342f",
+      "mtime": 1770403859286.4888
+    }
+  }
+}

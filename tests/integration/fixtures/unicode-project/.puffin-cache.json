@@ -1,0 +1,13 @@
+{
+  "version": "1.0.0",
+  "files": {
+    "C:/developer/code-scanner/tests/integration/fixtures/unicode-project/src/file with spaces.ts": {
+      "hash": "e6dc6f7e13317a5909bba311578639b18c2b646f947ba1f33557cc2caba3195d",
+      "mtime": 1770408711285.7578
+    },
+    "C:/developer/code-scanner/tests/integration/fixtures/unicode-project/src/🚀-puffin.ts": {
+      "hash": "127be96e1a7e5ddf5ead5c2c2032e65c91568f453c8f527ce79203d3b1950d7f",
+      "mtime": 1770408707185.7603
+    }
+  }
+}
