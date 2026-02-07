@@ -5,7 +5,7 @@ You are an AI developer tasked with resolving architectural and style violations
 
 ### 📂 Project Context
 - **Root Directory**: `C:\developer\code-scanner\tests\integration\fixtures\vite-advanced-project`
-- **Scan Date**: 2/7/2026, 8:49:16 AM
+- **Scan Date**: 2/7/2026, 8:57:40 AM
 
 ### 📊 Summary
 **Total Issues**: 1

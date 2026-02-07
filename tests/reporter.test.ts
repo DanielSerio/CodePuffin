@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { reportJson, reportMarkdown } from '../src/core/reporter';
+import { describe, it, expect, vi } from 'vitest';
+import { reportJson, reportMarkdown, reportStylish } from '../src/core/reporter';
 import { RuleResult } from '../src/core/rules';
 
 const root = '/project';
@@ -120,6 +120,7 @@ describe('reportMarkdown', () => {
     expect(output).toContain('| `src/file.ts` | - |');
     expect(output).toContain('🔴 **ERROR**');
   });
+
   it('handles empty results with success message', () => {
     const output = reportMarkdown([], root);
 
@@ -142,5 +143,31 @@ describe('reportMarkdown', () => {
     expect(output).toContain('Message \\| with pipe');
     expect(output).toContain('Suggestion \\| with pipe');
     expect(output).toContain('rule\\|pipe');
+  });
+});
+
+describe('reportStylish', () => {
+  it('logs success message for empty results', () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => { });
+    reportStylish([], root);
+    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('No issues found'));
+    logSpy.mockRestore();
+  });
+
+  it('logs grouped issues with colors', () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => { });
+    const results: RuleResult[] = [
+      makeResult({ file: '/project/src/a.ts', message: 'Error A', severity: 'error' }),
+      makeResult({ file: '/project/src/a.ts', message: 'Warn A', severity: 'warn' }),
+    ];
+
+    reportStylish(results, root);
+
+    const calls = logSpy.mock.calls.map(args => args[0]);
+    expect(calls.some(c => c.includes('a.ts'))).toBe(true);
+    expect(calls.some(c => c.includes('ERROR') && c.includes('Error A'))).toBe(true);
+    expect(calls.some(c => c.includes('WARN') && c.includes('Warn A'))).toBe(true);
+
+    logSpy.mockRestore();
   });
 });

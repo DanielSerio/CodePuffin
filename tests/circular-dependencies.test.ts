@@ -95,3 +95,71 @@ describe('buildImportGraph', () => {
     expect(graph.get(fileA)?.has(fileB)).toBe(true);
   });
 });
+
+import { CircularDependenciesRule } from '../src/rules/circular-dependencies';
+import { ScanContext } from '../src/core/scanner';
+
+describe('CircularDependenciesRule', () => {
+  const rule = new CircularDependenciesRule();
+
+  it('respects ignorePaths', async () => {
+    const fileA = getPath('/root/src/a.ts');
+    const fileB = getPath('/root/src/b.ts');
+
+    const context: ScanContext = {
+      root: getPath('/root'),
+      files: [fileA, fileB],
+      config: {
+        rules: {
+          'circular-dependencies': {
+            severity: 'error',
+            ignorePaths: ['src/b.ts']
+          }
+        }
+      }
+    } as any;
+
+    vi.mocked(fs.readFileSync).mockImplementation((p) => {
+      if (p === fileA || p === path.resolve(fileA)) return "import './b'";
+      if (p === fileB || p === path.resolve(fileB)) return "import './a'";
+      return "";
+    });
+
+    const results = await rule.run(context);
+    // Since B is ignored, only edges from A to unknown B (not in set) remain, 
+    // but detectCycles only iterates over context.files keys in graph.
+    // If B is filtered out, it won't be in the graph.
+    expect(results).toHaveLength(0);
+  });
+
+  it('respects maxDepth', async () => {
+    const fileA = getPath('/root/a.ts');
+    const fileB = getPath('/root/b.ts');
+    const fileC = getPath('/root/c.ts');
+
+    const context: ScanContext = {
+      root: getPath('/root'),
+      files: [fileA, fileB, fileC],
+      config: {
+        rules: {
+          'circular-dependencies': {
+            severity: 'error',
+            maxDepth: 2 // Only cycles of length 2 or less
+          }
+        }
+      }
+    } as any;
+
+    vi.mocked(fs.readFileSync).mockImplementation((p) => {
+      if (p === fileA || p === path.resolve(fileA)) return "import './b'";
+      if (p === fileB || p === path.resolve(fileB)) return "import './c'";
+      if (p === fileC || p === path.resolve(fileC)) return "import './a'";
+      return "";
+    });
+
+    const results = await rule.run(context);
+    // Cycle A -> B -> C -> A is length 3, should be ignored
+    expect(results).toHaveLength(0);
+  });
+});
+

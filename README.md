@@ -96,13 +96,13 @@ CodePuffin uses `puffin.json` to define your architectural rules.
       },
       "rules": [
         {
-          "from": "@features",
-          "to": "@features",
+          "importer": "@features",
+          "imports": "@features",
           "allow": false,
           "message": "Features cannot import other features"
         },
-        { "from": "@shared", "to": "@features", "allow": false },
-        { "from": "@features", "to": "@shared", "allow": true }
+        { "importer": "@shared", "imports": "@features", "allow": false },
+        { "importer": "@features", "imports": "@shared", "allow": true }
       ]
     },
     "layer-violations": {
@@ -113,8 +113,8 @@ CodePuffin uses `puffin.json` to define your architectural rules.
         { "name": "infra", "pattern": "src/infrastructure/**" }
       ],
       "allowed": [
-        { "from": "ui", "to": ["domain"] },
-        { "from": "infra", "to": ["domain"] }
+        { "importer": "ui", "imports": ["domain"] },
+        { "importer": "infra", "imports": ["domain"] }
       ]
     },
     "public-api-only": {
