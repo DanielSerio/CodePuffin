@@ -18,14 +18,12 @@
     },
     "module-boundaries": {
       "severity": "warn",
-      "modules": {
-        "@features": "src/features/*"
-      },
       "rules": [
         {
-          "importer": "@features",
-          "imports": "@features",
-          "allow": false
+          "importer": "features",
+          "imports": "features",
+          "allow": false,
+          "message": "Features should not import other features directly"
         }
       ]
     }

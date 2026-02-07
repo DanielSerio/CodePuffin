@@ -4,15 +4,20 @@ import { Rule, RuleResult } from '../core/rules';
 import { ScanContext } from '../core/scanner';
 import { extractImports, resolveImport, isSourceCodeFile } from '../utils/imports';
 
+// Resolves a potential module name (e.g. "@features") to its raw pattern from global registry
+function resolvePattern(nameOrPattern: string, globalModules: Record<string, string>): string {
+  return globalModules[nameOrPattern] || nameOrPattern;
+}
+
 // Checks if a file path matches any of the module patterns
 function isInProtectedModule(
   filePath: string,
-  modulePatterns: string[],
+  patterns: string[],
   root: string,
 ): boolean {
   const relativePath = path.relative(root, filePath).replace(/\\/g, '/');
 
-  for (const pattern of modulePatterns) {
+  for (const pattern of patterns) {
     // Check if this is a deep path into a protected module
     // e.g., pattern "src/features/*" should protect "src/features/auth/utils/helper.ts"
     const basePattern = pattern.replace(/\/\*$/, '');
@@ -28,12 +33,12 @@ function isInProtectedModule(
 // Gets the expected public API path for a module
 function getPublicApiPath(
   filePath: string,
-  modulePatterns: string[],
+  patterns: string[],
   root: string,
 ): string | undefined {
   const relativePath = path.relative(root, filePath).replace(/\\/g, '/');
 
-  for (const pattern of modulePatterns) {
+  for (const pattern of patterns) {
     const basePattern = pattern.replace(/\/\*$/, '');
 
     if (relativePath.startsWith(basePattern + '/')) {
@@ -75,7 +80,12 @@ export class PublicApiOnlyRule implements Rule {
     const config = context.config.rules?.['public-api-only'];
     if (!config) return [];
 
-    const { severity, modules: modulePatterns, exceptions } = config;
+    const globalModules = context.config.modules || {};
+    const { severity, modules: inputPatterns, exceptions } = config;
+
+    // Resolve any named modules to their patterns
+    const modulePatterns = inputPatterns.map(p => resolvePattern(p, globalModules));
+
     const results: RuleResult[] = [];
     const knownFiles = new Set(context.files.map(f => f.replace(/\\/g, '/')));
 

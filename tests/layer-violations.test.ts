@@ -21,13 +21,13 @@ describe('LayerViolationsRule', () => {
       files: ['/root/src/ui/Component.tsx', '/root/src/data/Repo.ts'],
       modules: {},
       config: {
+        modules: {
+          'ui': 'src/ui/**',
+          'data': 'src/data/**',
+        },
         rules: {
           'layer-violations': {
             severity: 'error',
-            layers: [
-              { name: 'ui', pattern: 'src/ui/**' },
-              { name: 'data', pattern: 'src/data/**' },
-            ],
             allowed: [
               { importer: 'data', imports: [] }, // data cannot import anything
               { importer: 'ui', imports: ['data'] }, // ui can import data
@@ -68,10 +68,10 @@ describe('LayerViolationsRule', () => {
       files: ['/root/src/ui/A.tsx', '/root/src/ui/B.tsx'],
       modules: {},
       config: {
+        modules: { 'ui': 'src/ui/**' },
         rules: {
           'layer-violations': {
             severity: 'error',
-            layers: [{ name: 'ui', pattern: 'src/ui/**' }],
             allowed: [{ importer: 'ui', imports: [] }],
           },
         },

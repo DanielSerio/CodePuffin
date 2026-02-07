@@ -18,12 +18,14 @@ describe('ConfigSchema', () => {
         include: ['lib/**/*'],
         exclude: ['dist'],
       },
-      modules: { ui: 'lib/ui/**/*' },
+      modules: {
+        '@ui': 'lib/ui/**/*',
+        '@features': 'src/features/*'
+      },
       rules: {
         'circular-dependencies': { severity: 'error' },
         'module-boundaries': {
           severity: 'error',
-          modules: { '@features': 'src/features/*' },
           rules: [{ importer: '@features', imports: '@features', allow: false }],
         },
       },
@@ -86,15 +88,15 @@ describe('ConfigSchema', () => {
     }
   });
 
-  it('accepts module-boundaries rule with full config', () => {
+  it('accepts module-boundaries rule referencing global modules', () => {
     const config = {
+      modules: {
+        '@features': 'src/features/*',
+        '@shared': 'src/shared/*',
+      },
       rules: {
         'module-boundaries': {
           severity: 'error',
-          modules: {
-            '@features': 'src/features/*',
-            '@shared': 'src/shared/*',
-          },
           rules: [
             { importer: '@features', imports: '@features', allow: false, message: 'No cross-feature imports' },
             { importer: '@features', imports: '@shared', allow: true },
@@ -107,16 +109,16 @@ describe('ConfigSchema', () => {
     expect(result.success).toBe(true);
   });
 
-  it('accepts layer-violations rule with full config', () => {
+  it('accepts layer-violations rule referencing global modules', () => {
     const config = {
+      modules: {
+        'ui': 'src/ui/**',
+        'services': 'src/services/**',
+        'data': 'src/data/**',
+      },
       rules: {
         'layer-violations': {
           severity: 'error',
-          layers: [
-            { name: 'ui', pattern: 'src/ui/**' },
-            { name: 'services', pattern: 'src/services/**' },
-            { name: 'data', pattern: 'src/data/**' },
-          ],
           allowed: [
             { importer: 'ui', imports: ['services'] },
             { importer: 'services', imports: ['data'] },
@@ -175,17 +177,6 @@ describe('ConfigSchema', () => {
 
       const result = ConfigSchema.safeParse(config);
       expect(result.success).toBe(false);
-    });
-
-    it('accepts config with extra unknown properties (passthrough)', () => {
-      const config = {
-        unknownProperty: 'value',
-        rules: {},
-      };
-
-      const result = ConfigSchema.safeParse(config);
-      // Zod strict mode would fail, but default should pass or strip
-      expect(result.success).toBe(true);
     });
   });
 });

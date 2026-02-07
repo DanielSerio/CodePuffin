@@ -10,7 +10,8 @@ export class ModuleBoundariesRule implements Rule {
     const config = context.config.rules?.['module-boundaries'];
     if (!config) return [];
 
-    const { severity, modules: modulePatterns, rules: boundaryRules } = config;
+    const modulePatterns = context.config.modules || {};
+    const { severity, rules: boundaryRules } = config;
     const results: RuleResult[] = [];
     const knownFiles = new Set(context.files.map(f => f.replace(/\\/g, '/')));
 

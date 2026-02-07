@@ -73,45 +73,37 @@ export default defineConfig({
 
 ## Configuration
 
-CodePuffin uses `puffin.json` to define your architectural rules.
+CodePuffin uses `puffin.json` to define your architectural manifest. All named patterns (modules, layers, areas) are centralized in the root `modules` registry.
 
 ```json
 {
   "project": {
     "include": ["src/**/*"],
-    "exclude": ["node_modules", "dist", "**/*.test.*"]
+    "exclude": ["node_modules", "dist", "**/*.test.*"],
+    "aliases": { "@/*": "src/*" }
   },
   "modules": {
+    "app": "src/app/**/*",
     "features": "src/features/*",
-    "shared": "src/shared/*",
-    "core": "src/core/*"
+    "ui": "src/components/**/*",
+    "domain": "src/domain/**",
+    "infra": "src/infrastructure/**"
   },
   "rules": {
     "module-boundaries": {
       "severity": "error",
-      "modules": {
-        "@features": "src/features/*",
-        "@shared": "src/shared/*",
-        "@core": "src/core/*"
-      },
       "rules": [
         {
-          "importer": "@features",
-          "imports": "@features",
+          "importer": "features",
+          "imports": "features",
           "allow": false,
-          "message": "Features cannot import other features"
+          "message": "Features cannot import other features directly"
         },
-        { "importer": "@shared", "imports": "@features", "allow": false },
-        { "importer": "@features", "imports": "@shared", "allow": true }
+        { "importer": "features", "imports": "app", "allow": false }
       ]
     },
     "layer-violations": {
       "severity": "error",
-      "layers": [
-        { "name": "ui", "pattern": "src/components/**" },
-        { "name": "domain", "pattern": "src/domain/**" },
-        { "name": "infra", "pattern": "src/infrastructure/**" }
-      ],
       "allowed": [
         { "importer": "ui", "imports": ["domain"] },
         { "importer": "infra", "imports": ["domain"] }
@@ -119,7 +111,7 @@ CodePuffin uses `puffin.json` to define your architectural rules.
     },
     "public-api-only": {
       "severity": "error",
-      "modules": ["src/features/*"],
+      "modules": ["features"],
       "exceptions": ["**/*.test.ts"]
     },
     "circular-dependencies": {

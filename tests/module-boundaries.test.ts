@@ -21,13 +21,13 @@ describe('ModuleBoundariesRule', () => {
       files: ['/root/src/features/A/service.ts', '/root/src/features/B/service.ts'],
       modules: {},
       config: {
+        modules: {
+          '@featureA': 'src/features/A/*',
+          '@featureB': 'src/features/B/*',
+        },
         rules: {
           'module-boundaries': {
             severity: 'error',
-            modules: {
-              '@featureA': 'src/features/A/*',
-              '@featureB': 'src/features/B/*',
-            },
             rules: [
               { importer: '@featureA', imports: '@featureB', allow: false, message: 'A cannot import B' }
             ],
@@ -62,13 +62,13 @@ describe('ModuleBoundariesRule', () => {
       files: ['/root/src/features/A/service.ts', '/root/src/shared/util.ts'],
       modules: {},
       config: {
+        modules: {
+          '@featureA': 'src/features/A/*',
+          '@shared': 'src/shared/*',
+        },
         rules: {
           'module-boundaries': {
             severity: 'error',
-            modules: {
-              '@featureA': 'src/features/A/*',
-              '@shared': 'src/shared/*',
-            },
             rules: [
               { importer: '@featureA', imports: '@shared', allow: true }
             ],

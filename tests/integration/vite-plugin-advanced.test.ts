@@ -52,11 +52,11 @@ export default defineConfig({
     const customConfigPath = path.join(fixtureDir, 'custom-puffin.json');
     fs.writeFileSync(customConfigPath, JSON.stringify({
       project: { include: ["src/**/*"] },
+      modules: { "features": "src/features/*" },
       rules: {
         "module-boundaries": {
           severity: "warn",
-          modules: { "@features": "src/features/*" },
-          rules: [{ importer: "@features", imports: "@features", allow: false }]
+          rules: [{ importer: "features", imports: "features", allow: false }]
         }
       }
     }));

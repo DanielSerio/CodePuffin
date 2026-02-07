@@ -48,7 +48,7 @@ async function runScan(directory: string, options: ScanOptions) {
   if (moduleCount > 0) {
     console.log(pc.gray(`📦 Resolved ${pc.white(moduleCount)} modules:`));
     for (const name of Object.keys(context.modules)) {
-      console.log(pc.gray(`   - @${name} (${context.modules[name].length} files)`));
+      console.log(pc.gray(`   - ${name} (${context.modules[name].length} files)`));
     }
   }
 

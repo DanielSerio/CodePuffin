@@ -4,16 +4,16 @@
       "src/**/*"
     ]
   },
+  "modules": {
+    "features": "src/features/*"
+  },
   "rules": {
     "module-boundaries": {
       "severity": "error",
-      "modules": {
-        "@features": "src/features/*"
-      },
       "rules": [
         {
-          "importer": "@features",
-          "imports": "@features",
+          "importer": "features",
+          "imports": "features",
           "allow": false
         }
       ]

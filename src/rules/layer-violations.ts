@@ -28,14 +28,18 @@ export class LayerViolationsRule implements Rule {
     const config = context.config.rules?.['layer-violations'];
     if (!config) return [];
 
-    const { severity, layers, allowed } = config;
+    const modulePatterns = context.config.modules || {};
+    const { severity, allowed } = config;
     const results: RuleResult[] = [];
     const knownFiles = new Set(context.files.map(f => f.replace(/\\/g, '/')));
+
+    // Use centralized modules as layers
+    const layerEntries = Object.entries(modulePatterns).map(([name, pattern]) => ({ name, pattern }));
 
     for (const filePath of context.files) {
       if (!isSourceCodeFile(filePath)) continue;
 
-      const sourceLayer = matchFileToPattern(filePath, layers, context.root);
+      const sourceLayer = matchFileToPattern(filePath, layerEntries, context.root);
       if (!sourceLayer) continue;
 
       const imports = extractImports(filePath, context.root, this.id);
@@ -50,7 +54,7 @@ export class LayerViolationsRule implements Rule {
         );
         if (!resolvedPath) continue;
 
-        const targetLayer = matchFileToPattern(resolvedPath, layers, context.root);
+        const targetLayer = matchFileToPattern(resolvedPath, layerEntries, context.root);
         if (!targetLayer) continue;
 
         if (!isImportAllowed(sourceLayer, targetLayer, allowed)) {

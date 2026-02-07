@@ -4,24 +4,24 @@
       "src/**/*"
     ]
   },
+  "modules": {
+    "components": "src/components/*",
+    "features": "src/features/*",
+    "routes": "src/routes/*"
+  },
   "rules": {
     "module-boundaries": {
       "severity": "error",
-      "modules": {
-        "@components": "src/components/*",
-        "@features": "src/features/*",
-        "@routes": "src/routes/*"
-      },
       "rules": [
         {
-          "importer": "@routes",
-          "imports": "@components",
+          "importer": "routes",
+          "imports": "components",
           "allow": false,
           "message": "Routes cannot import components directly. Routes should consume feature module pages."
         },
         {
-          "importer": "@features",
-          "imports": "@routes",
+          "importer": "features",
+          "imports": "routes",
           "allow": false,
           "message": "Features should not import routes."
         }
