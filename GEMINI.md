@@ -4,10 +4,11 @@ This document provides instructional context for interacting with the `CodePuffi
 
 ## 1. Project Overview
 
-`CodePuffin` is a high-performance, local-first static analysis tool for TypeScript projects. It is designed to enforce architectural integrity and code quality rules without relying on external APIs or AI services. Its core purpose is to be a deterministic and fast checker for rules that go beyond standard linting, such as dead code detection, complexity analysis, and project-specific naming conventions.
+`CodePuffin` is a high-performance, local-first static analysis tool for TypeScript projects. It is designed to enforce architectural integrity and code quality rules without relying on external APIs or AI services. Its core purpose is to be a deterministic and fast checker for rules that go beyond standard linting, such as dead code detection, architectural boundary enforcement, and circular dependency analysis.
 
 The tool operates via two main interfaces:
-1.  A Command-Line Interface (CLI) invoked with the `puffin` command.
+
+1.  A Command-Line Interface (CLI) invoked with the `puffin` (via `dist/index.js`) command.
 2.  Plugins for popular build tools like Vite and Next.js.
 
 Configuration is managed through a `puffin.json` file in the root of the target project.
@@ -16,69 +17,55 @@ Configuration is managed through a `puffin.json` file in the root of the target 
 
 - **Language**: TypeScript
 - **Runtime**: Node.js
-- **Package Manager**: pnpm (configured with workspaces)
-- **Core Engine**: TypeScript Compiler API for Abstract Syntax Tree (AST) analysis.
+- **Package Manager**: pnpm (configured with workspaces for examples)
+- **Core Engine**: TypeScript Compiler API for AST analysis.
 - **Build Tool**: `tsup` for compiling TypeScript to both CJS and ESM modules.
 - **CLI Framework**: `commander`
 - **Unit Testing**: `vitest`
 - **Integration Testing**: `playwright`
 - **Configuration Validation**: `zod`
+- **Pattern Matching**: `minimatch` and `fast-glob`
 
 ## 3. Project Structure
 
-The codebase is organized into a `src` directory with a clear separation of concerns:
-
-- `src/cli/`: Contains the entry point and logic for the command-line interface.
-- `src/core/`: Implements the main scanning engine (`scanner.ts`), configuration loading (`config.ts`), and reporting (`reporter.ts`). The scanner is responsible for traversing the file system based on `puffin.json` and orchestrating the execution of rules.
-- `src/rules/`: Contains the implementation for each analysis rule (e.g., `dead-code.ts`, `line-limits.ts`). Each rule is a class that implements the `Rule` interface.
-- `src/plugins/`: Provides integrations for external tools like Vite (`vite.ts`) and Next.js (`next.ts`).
-- `src/utils/`: A collection of shared utility functions.
-- `tests/`: Contains all tests.
-  - `tests/integration/`: End-to-end tests for the CLI and plugins, run using Playwright. These tests typically execute the compiled CLI against fixture projects.
-  - All other `*.test.ts` files are unit tests run by Vitest.
+- `src/cli/`: Entry point and `commander` setup.
+- `src/core/`:
+  - `config.ts`: Zod schema for `puffin.json`. Defines a central `modules` registry for named patterns.
+  - `scanner.ts`: Discovers files and resolves named modules into absolute file sets.
+  - `runner.ts`: Orchestrates rule execution with time-outs.
+  - `reporter.ts`: Formats results into Console (stylish), JSON, or Markdown.
+  - `graph.ts`: Analyzes module-level dependencies to generate Mermaid diagrams.
+  - `bootstrap.ts`: High-level pipeline functions for loading config and running scans.
+- `src/rules/`: Implementation of analysis rules. Each rule is a class implementing the `Rule` interface.
+  - `module-boundaries.ts`: Enforces import rules between named modules.
+  - `layer-violations.ts`: Ensures unidirectional dependency flow between layers.
+  - `public-api-only.ts`: Prevents deep imports by enforcing barrel exports.
+  - `circular-dependencies.ts`: Detects import cycles.
+- `src/plugins/`: Vite and Next.js integrations.
+- `src/utils/`: Shared logic for path resolution and import extraction.
+- `tests/`: Unit tests (`*.test.ts`) and integration tests (`integration/`).
 
 ## 4. Development Workflow
 
-The project uses `pnpm` as its package manager.
-
-- **Installation**:
-  ```bash
-  pnpm install
-  ```
-
-- **Building**:
-  To compile the TypeScript source code into distributable JavaScript files in the `dist/` directory:
-  ```bash
-  pnpm build
-  ```
-
+- **Installation**: `pnpm install`
+- **Building**: `pnpm build` (compiles to `dist/`)
 - **Running Tests**:
-  The test suite is divided into unit and integration tests.
-  - **Run all tests**:
-    ```bash
-    pnpm test
-    ```
-  - **Run only unit tests**:
-    ```bash
-    pnpm test:unit
-    ```
-  - **Run only integration tests** (requires a prior build):
-    ```bash
-    pnpm test:integration
-    ```
-
-- **Development Mode**:
-  To run the tool in watch mode, which automatically rebuilds and executes the scanner on file changes:
-  ```bash
-  pnpm dev
-  ```
+  - `pnpm test` (Unit + Integration)
+  - `pnpm test:unit`
+  - `pnpm test:integration` (requires `pnpm build` first)
+- **Development**: `pnpm dev` runs a watch loop that rebuilds and runs a test scan.
 
 ## 5. Architectural Conventions
 
-- **Rule Implementation**: New rules should be created as `class` files within the `src/rules/` directory. Each rule must implement the `Rule` interface and have a unique `id`. The `run` method receives the `ScanContext` and is responsible for returning an array of `RuleResult` objects for any violations found.
-- **AST Analysis**: The tool leverages the TypeScript Compiler API for parsing source code. Rules can traverse the AST to inspect code structure, identify patterns, and check for violations. The `dead-code.ts` rule is a good example of this pattern.
-- **Configuration**: All configuration is driven by the `puffin.json` file, which is validated using a Zod schema defined in `src/core/config.ts`.
-- **Immutability**: The scanner and rules should not modify the source files they are analyzing. They are designed for read-only analysis.
-- **Testing**:
-  - Any new rule or core logic should be accompanied by unit tests using `vitest`.
-  - Changes to the CLI's behavior or output should be validated with an integration test in `tests/integration/` using `playwright`. Fixture projects in `tests/integration/fixtures/` are used to create specific scenarios for testing.
+- **Centralized Patterns**: Architecture is defined via a root `modules` registry in `puffin.json`. Rules reference these names (e.g., "features", "ui") instead of re-defining patterns.
+- **Import Resolution**: The tool handles TypeScript path aliases (e.g. `@/*`) automatically via the `project.aliases` configuration.
+- **Rule Implementation**: Rules receive a `ScanContext` which contains the full configuration and the resolved module map.
+- **Visual Evidence**: Markdown reports automatically include an architectural dependency graph using Mermaid syntax, highlighting violations with red dashed lines.
+- **Immutability**: Rules are strictly read-only and must never modify the source code.
+- **Error Handling**: The CLI exits with code 1 if any `error` level violations are found, and code 0 otherwise.
+
+## 6. Testing Strategy
+
+- **Unit Testing**: Focused on rule logic and utility functions. Uses `vitest`.
+- **Integration Testing**: Uses `playwright` to run the compiled CLI against fixture projects in `tests/integration/fixtures/`. This verifies the end-to-end behavior including config parsing, file discovery, and reporting.
+- **Mocking**: Extensive use of `vi.mock` in unit tests to simulate complex file system states or import graphs.
