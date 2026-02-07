@@ -24,7 +24,7 @@ describe('ConfigSchema', () => {
         'module-boundaries': {
           severity: 'error',
           modules: { '@features': 'src/features/*' },
-          rules: [{ from: '@features', to: '@features', allow: false }],
+          rules: [{ importer: '@features', imports: '@features', allow: false }],
         },
       },
       output: { format: 'json', reportFile: 'report.json' },
@@ -96,8 +96,8 @@ describe('ConfigSchema', () => {
             '@shared': 'src/shared/*',
           },
           rules: [
-            { from: '@features', to: '@features', allow: false, message: 'No cross-feature imports' },
-            { from: '@features', to: '@shared', allow: true },
+            { importer: '@features', imports: '@features', allow: false, message: 'No cross-feature imports' },
+            { importer: '@features', imports: '@shared', allow: true },
           ],
         },
       },
@@ -118,8 +118,8 @@ describe('ConfigSchema', () => {
             { name: 'data', pattern: 'src/data/**' },
           ],
           allowed: [
-            { from: 'ui', to: ['services'] },
-            { from: 'services', to: ['data'] },
+            { importer: 'ui', imports: ['services'] },
+            { importer: 'services', imports: ['data'] },
           ],
         },
       },

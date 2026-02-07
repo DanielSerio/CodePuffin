@@ -16,12 +16,12 @@ describe('createRunner', () => {
         'module-boundaries': {
           severity: 'error',
           modules: { '@features': 'src/features/*' },
-          rules: [{ from: '@features', to: '@features', allow: false }],
+          rules: [{ importer: '@features', imports: '@features', allow: false }],
         },
         'layer-violations': {
           severity: 'warn',
           layers: [{ name: 'ui', pattern: 'src/ui/**' }],
-          allowed: [{ from: 'ui', to: ['services'] }],
+          allowed: [{ importer: 'ui', imports: ['services'] }],
         },
         'public-api-only': {
           severity: 'warn',

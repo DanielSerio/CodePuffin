@@ -32,7 +32,7 @@ describe('resolveImport', () => {
     const fileMain = getPath('/root/src/main.ts');
     const knownFiles = new Set([fileA]);
 
-    expect(resolveImport('./a.ts', fileMain, knownFiles)).toBe(fileA);
+    expect(resolveImport('./a.ts', fileMain, knownFiles, getPath('/root'))).toBe(fileA);
   });
 
   it('resolves with implicit extension', () => {
@@ -40,7 +40,7 @@ describe('resolveImport', () => {
     const fileMain = getPath('/root/src/main.ts');
     const knownFiles = new Set([fileA]);
 
-    expect(resolveImport('./a', fileMain, knownFiles)).toBe(fileA);
+    expect(resolveImport('./a', fileMain, knownFiles, getPath('/root'))).toBe(fileA);
   });
 
   it('resolves a directory with index.ts', () => {
@@ -48,7 +48,7 @@ describe('resolveImport', () => {
     const fileMain = getPath('/root/src/main.ts');
     const knownFiles = new Set([fileIndex]);
 
-    expect(resolveImport('.', fileMain, knownFiles)).toBe(fileIndex);
+    expect(resolveImport('.', fileMain, knownFiles, getPath('/root'))).toBe(fileIndex);
   });
 });
 
@@ -63,7 +63,13 @@ describe('buildImportGraph', () => {
       return "";
     });
 
-    const graph = buildImportGraph([fileA, fileB], getPath('/root'));
+    const mockContext = {
+      root: getPath('/root'),
+      files: [fileA, fileB],
+      config: { project: { aliases: {} } }
+    } as any;
+
+    const graph = buildImportGraph([fileA, fileB], mockContext);
 
     expect(graph.get(fileA)?.has(fileB)).toBe(true);
   });
@@ -78,7 +84,13 @@ describe('buildImportGraph', () => {
       return "";
     });
 
-    const graph = buildImportGraph([fileA, fileB], getPath('/root'));
+    const mockContext = {
+      root: getPath('/root'),
+      files: [fileA, fileB],
+      config: { project: { aliases: {} } }
+    } as any;
+
+    const graph = buildImportGraph([fileA, fileB], mockContext);
 
     expect(graph.get(fileA)?.has(fileB)).toBe(true);
   });

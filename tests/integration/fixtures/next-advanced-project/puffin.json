@@ -1,6 +1,16 @@
 {
   "project": {
-    "include": ["src/**/*"]
+    "include": [
+      "src/**/*"
+    ],
+    "aliases": {
+      "@/*": "src/*"
+    }
+  },
+  "modules": {
+    "app": "src/app/**/*",
+    "features": "src/features/*",
+    "components": "src/components/**/*"
   },
   "rules": {
     "module-boundaries": {
@@ -9,8 +19,15 @@
         "@features": "src/features/*"
       },
       "rules": [
-        { "from": "@features", "to": "@features", "allow": false, "message": "Features cannot import other features" }
+        {
+          "importer": "@features",
+          "imports": "@features",
+          "allow": false
+        }
       ]
     }
+  },
+  "output": {
+    "format": "markdown"
   }
 }

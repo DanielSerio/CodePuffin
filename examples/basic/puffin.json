@@ -2,7 +2,15 @@
   "project": {
     "include": [
       "src/**/*"
-    ]
+    ],
+    "aliases": {
+      "@/*": "src/*"
+    }
+  },
+  "modules": {
+    "app": "src/app/**/*",
+    "features": "src/features/*",
+    "components": "src/components/**/*"
   },
   "rules": {
     "circular-dependencies": {
@@ -14,7 +22,11 @@
         "@features": "src/features/*"
       },
       "rules": [
-        { "from": "@features", "to": "@features", "allow": false }
+        {
+          "importer": "@features",
+          "imports": "@features",
+          "allow": false
+        }
       ]
     }
   },

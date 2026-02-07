@@ -56,7 +56,7 @@ export default defineConfig({
         "module-boundaries": {
           severity: "warn",
           modules: { "@features": "src/features/*" },
-          rules: [{ from: "@features", to: "@features", allow: false }]
+          rules: [{ importer: "@features", imports: "@features", allow: false }]
         }
       }
     }));

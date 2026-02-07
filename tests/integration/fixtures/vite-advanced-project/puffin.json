@@ -1,17 +1,25 @@
 {
   "project": {
-    "include": ["src/**/*"]
+    "include": [
+      "src/**/*"
+    ]
   },
   "rules": {
     "module-boundaries": {
       "severity": "error",
       "modules": {
-        "@features": "src/features/*",
-        "@shared": "src/shared/*"
+        "@features": "src/features/*"
       },
       "rules": [
-        { "from": "@features", "to": "@features", "allow": false, "message": "Features cannot import other features" }
+        {
+          "importer": "@features",
+          "imports": "@features",
+          "allow": false
+        }
       ]
     }
+  },
+  "output": {
+    "format": "markdown"
   }
 }
