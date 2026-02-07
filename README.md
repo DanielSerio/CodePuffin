@@ -163,6 +163,7 @@ CodePuffin uses `puffin.json` to define your architectural manifest. All named p
 ### 📊 Reporting
 
 - **Stylish Console**: Real-time terminal feedback.
+- **🗺️ Architectural Visualization**: Automated Mermaid diagrams in Markdown reports (no AI required).
 - **Agent-Ready Markdown**: Reports designed to be "missions" for AI coding agents.
 - **Actionable JSON**: For custom CI/CD integrations.
 

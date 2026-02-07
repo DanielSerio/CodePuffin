@@ -51,7 +51,7 @@ export default function codePuffinPlugin(options: VitePluginOptions = {}): Plugi
     }
 
     // Write report file if configured
-    writeReportFile(config, scanResults, root);
+    writeReportFile(context, scanResults);
 
     if (options.failOnError && scanResults.some(r => r.severity === 'error')) {
       throw new Error('[CodePuffin] Architectural scan failed with errors.');

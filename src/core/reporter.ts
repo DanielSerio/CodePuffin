@@ -3,6 +3,8 @@ import path from 'path';
 import { mkdirSync, writeFileSync } from 'fs';
 import { RuleResult } from './rules';
 import { Config } from './config';
+import { ScanContext } from './scanner';
+import { buildModuleGraph, generateMermaid } from './graph';
 
 export function reportStylish(results: RuleResult[], root: string) {
   if (results.length === 0) {
@@ -60,7 +62,8 @@ export function reportJson(results: RuleResult[], root: string): string {
 }
 
 // Returns Markdown report optimized for human developers and AI coding agents
-export function reportMarkdown(results: RuleResult[], root: string): string {
+export function reportMarkdown(results: RuleResult[], context: ScanContext): string {
+  const root = context.root;
   const escapeTable = (str: string) => str.replace(/\|/g, '\\|');
   const summary = summarize(results);
   const lines: string[] = [];
@@ -79,6 +82,19 @@ export function reportMarkdown(results: RuleResult[], root: string): string {
   lines.push(`- **Errors**: ${summary.errors}`);
   lines.push(`- **Warnings**: ${summary.warnings}`);
   lines.push('');
+
+  // --- NEW FEATURE: Module Boundary Diagram ---
+  if (Object.keys(context.modules).length > 0) {
+    const edges = buildModuleGraph(context);
+    if (edges.length > 0) {
+      lines.push('## 🗺️ Architecture Visualization');
+      lines.push('');
+      lines.push('```mermaid');
+      lines.push(generateMermaid(edges));
+      lines.push('```');
+      lines.push('');
+    }
+  }
 
   if (results.length === 0) {
     lines.push('✨ **Great job! No issues found.**');
@@ -107,7 +123,8 @@ export function reportMarkdown(results: RuleResult[], root: string): string {
 }
 
 // Writes a report file based on the configured output format
-export function writeReportFile(config: Config, results: RuleResult[], root: string) {
+export function writeReportFile(context: ScanContext, results: RuleResult[]) {
+  const { config, root } = context;
   const { format, reportFile: configuredFile } = config.output;
   if (format === 'stylish') return;
 
@@ -124,8 +141,9 @@ export function writeReportFile(config: Config, results: RuleResult[], root: str
 
   if (!fileName) return;
 
-  const formatter = format === 'markdown' ? reportMarkdown : reportJson;
-  const content = formatter(results, root);
+  const content = format === 'markdown'
+    ? reportMarkdown(results, context as any)
+    : reportJson(results, context.root);
 
   // Replace [timestamp] if present (only for JSON reports to keep Markdown reports stable)
   let finalFileName = fileName;

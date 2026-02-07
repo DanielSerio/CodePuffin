@@ -59,7 +59,7 @@ async function runScan(directory: string, options: ScanOptions) {
   reportStylish(results, context.root);
 
   // Write report file if configured
-  writeReportFile(validatedConfig, results, context.root);
+  writeReportFile(context, results);
 
   if (results.some((r: RuleResult) => r.severity === 'error')) {
     console.log(pc.red('\n✖ Scan failed due to errors.'));

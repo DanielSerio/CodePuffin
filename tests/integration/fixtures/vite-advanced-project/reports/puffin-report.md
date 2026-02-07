@@ -4,13 +4,22 @@
 You are an AI developer tasked with resolving architectural and style violations. Use the report below to identify, locate, and fix the issues.
 
 ### 📂 Project Context
-- **Root Directory**: `C:\developer\code-scanner\tests\integration\fixtures\vite-advanced-project`
-- **Scan Date**: 2/7/2026, 9:08:35 AM
+- **Root Directory**: `C:/developer/code-scanner/tests/integration/fixtures/vite-advanced-project`
+- **Scan Date**: 2/7/2026, 9:22:02 AM
 
 ### 📊 Summary
 **Total Issues**: 1
 - **Errors**: 1
 - **Warnings**: 0
+
+## 🗺️ Architecture Visualization
+
+```mermaid
+flowchart TD
+  features["features"]
+  features -. violation! .-> features
+  linkStyle 0 stroke:#ff0000,stroke-width:2px;
+```
 
 ## 🛠️ Issues
 

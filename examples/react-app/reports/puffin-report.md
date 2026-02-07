@@ -4,13 +4,26 @@
 You are an AI developer tasked with resolving architectural and style violations. Use the report below to identify, locate, and fix the issues.
 
 ### 📂 Project Context
-- **Root Directory**: `C:\developer\code-scanner\examples\react-app`
-- **Scan Date**: 2/7/2026, 9:12:18 AM
+- **Root Directory**: `C:/developer/code-scanner/examples/react-app`
+- **Scan Date**: 2/7/2026, 9:21:46 AM
 
 ### 📊 Summary
 **Total Issues**: 1
 - **Errors**: 1
 - **Warnings**: 0
+
+## 🗺️ Architecture Visualization
+
+```mermaid
+flowchart TD
+  routes["routes"]
+  features["features"]
+  components["components"]
+  routes --> features
+  routes -. violation! .-> components
+  linkStyle 1 stroke:#ff0000,stroke-width:2px;
+  features --> components
+```
 
 ## 🛠️ Issues
 

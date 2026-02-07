@@ -57,7 +57,7 @@ export default function withCodePuffin(nextConfig: NextConfig = {}, options: Nex
           }
 
           // Write report file if configured
-          writeReportFile(config, scanResults, root);
+          writeReportFile(context, scanResults);
 
           if (options.failOnError && scanResults.some(r => r.severity === 'error')) {
             throw new Error('[CodePuffin] Architectural scan failed with errors.');

@@ -1,8 +1,25 @@
 import { describe, it, expect, vi } from 'vitest';
 import { reportJson, reportMarkdown, reportStylish } from '../src/core/reporter';
 import { RuleResult } from '../src/core/rules';
+import { ScanContext } from '../src/core/scanner';
 
 const root = '/project';
+
+// Simple mock context for tests
+const mockContext: ScanContext = {
+  root,
+  config: {
+    project: {
+      include: ['src/**/*'],
+      exclude: ['node_modules'],
+      aliases: {}
+    },
+    rules: {},
+    output: { format: 'stylish' }
+  },
+  files: ['/project/src/file.ts', '/project/src/other.ts'],
+  modules: {}
+};
 
 function makeResult(overrides: Partial<RuleResult> = {}): RuleResult {
   return {
@@ -71,7 +88,7 @@ describe('reportMarkdown', () => {
       makeResult({ severity: 'warn', message: 'A warning' }),
     ];
 
-    const output = reportMarkdown(results, root);
+    const output = reportMarkdown(results, mockContext);
 
     expect(output).toContain('# 🐧 CodePuffin Scan Report');
     expect(output).toContain('### 📊 Summary');
@@ -83,7 +100,7 @@ describe('reportMarkdown', () => {
   it('includes agent mission section', () => {
     const results: RuleResult[] = [makeResult()];
 
-    const output = reportMarkdown(results, root);
+    const output = reportMarkdown(results, mockContext);
 
     expect(output).toContain('## 🤖 Agent Mission');
     expect(output).toContain('AI developer');
@@ -95,7 +112,7 @@ describe('reportMarkdown', () => {
       makeResult({ file: '/project/src/b.ts', message: 'Issue B' }),
     ];
 
-    const output = reportMarkdown(results, root);
+    const output = reportMarkdown(results, mockContext);
 
     expect(output).toContain('| File Path | Line | Severity |');
     expect(output).toContain('`src/a.ts`');
@@ -105,7 +122,7 @@ describe('reportMarkdown', () => {
   it('renders table rows with line numbers using [L#] format', () => {
     const results: RuleResult[] = [makeResult({ line: 10, severity: 'error' })];
 
-    const output = reportMarkdown(results, root);
+    const output = reportMarkdown(results, mockContext);
 
     expect(output).toContain('[L10]');
     expect(output).toContain('🔴 **ERROR**');
@@ -114,7 +131,7 @@ describe('reportMarkdown', () => {
   it('renders dash for missing line numbers', () => {
     const results: RuleResult[] = [makeResult()];
 
-    const output = reportMarkdown(results, root);
+    const output = reportMarkdown(results, mockContext);
 
     // Line column shows - for missing line numbers
     expect(output).toContain('| `src/file.ts` | - |');
@@ -122,7 +139,7 @@ describe('reportMarkdown', () => {
   });
 
   it('handles empty results with success message', () => {
-    const output = reportMarkdown([], root);
+    const output = reportMarkdown([], mockContext);
 
     expect(output).toContain('**Total Issues**: 0');
     expect(output).toContain('Great job! No issues found.');
@@ -137,7 +154,7 @@ describe('reportMarkdown', () => {
       })
     ];
 
-    const output = reportMarkdown(results, root);
+    const output = reportMarkdown(results, mockContext);
 
     // Should contain escaped pipes \|
     expect(output).toContain('Message \\| with pipe');
