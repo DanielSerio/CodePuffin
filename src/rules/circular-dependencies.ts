@@ -8,7 +8,7 @@ import { resolveImport, extractImports } from '../utils/imports';
 // Only includes edges for relative imports to files within the project.
 export function buildImportGraph(
   files: string[],
-  root: string,
+  context: ScanContext,
 ): Map<string, Set<string>> {
   const graph = new Map<string, Set<string>>();
   const knownFiles = new Set(files.map(f => f.replace(/\\/g, '/')));
@@ -18,12 +18,15 @@ export function buildImportGraph(
     const edges = new Set<string>();
     graph.set(normalizedPath, edges);
 
-    const imports = extractImports(filePath, root, 'circular-dependencies');
+    const imports = extractImports(filePath, context.root, 'circular-dependencies');
     for (const { specifier } of imports) {
-      // Only process relative imports
-      if (!specifier.startsWith('.')) continue;
-
-      const resolved = resolveImport(specifier, normalizedPath, knownFiles);
+      const resolved = resolveImport(
+        specifier,
+        normalizedPath,
+        knownFiles,
+        context.root,
+        context.config.project?.aliases
+      );
       if (resolved) {
         edges.add(resolved);
       }
@@ -120,7 +123,7 @@ export class CircularDependenciesRule implements Rule {
       });
     }
 
-    const graph = buildImportGraph(files, context.root);
+    const graph = buildImportGraph(files, context);
     let cycles = detectCycles(graph);
 
     // Filter cycles by maxDepth (max number of files in the cycle)

@@ -11,7 +11,7 @@ const SOURCE_EXTENSIONS = new Set([
   '.md', '.mdx',
 ]);
 
-function isSourceFile(filePath: string): boolean {
+export function isSourceFile(filePath: string): boolean {
   return SOURCE_EXTENSIONS.has(path.extname(filePath).toLowerCase());
 }
 
@@ -61,7 +61,12 @@ export class Scanner {
     const modules: Record<string, string[]> = {};
     if (this.config.modules) {
       for (const [name, pattern] of Object.entries(this.config.modules)) {
-        const moduleFiles = await fg(normalizeGlob(pattern as string), {
+        const normalized = normalizeGlob(pattern as string);
+        const expandedPattern = normalized.endsWith('/*')
+          ? normalized.slice(0, -2) + '/**/*'
+          : normalized;
+
+        const moduleFiles = await fg(expandedPattern, {
           cwd: this.root,
           ignore: exclude,
           absolute: true,

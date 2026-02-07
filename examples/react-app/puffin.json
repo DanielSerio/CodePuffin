@@ -5,18 +5,31 @@
     ]
   },
   "rules": {
-    "line-limits": {
-      "severity": "warn",
-      "default": 100
+    "module-boundaries": {
+      "severity": "error",
+      "modules": {
+        "@components": "src/components/*",
+        "@features": "src/features/*",
+        "@routes": "src/routes/*"
+      },
+      "rules": [
+        {
+          "importer": "@routes",
+          "imports": "@components",
+          "allow": false,
+          "message": "Routes cannot import components directly. Routes should consume feature module pages."
+        },
+        {
+          "importer": "@features",
+          "imports": "@routes",
+          "allow": false,
+          "message": "Features should not import routes."
+        }
+      ]
     },
-    "naming-convention": {
-      "severity": "warn",
-      "files": "kebab-case",
-      "variables": "camelCase",
-      "components": {
-        "entity": "PascalCase",
-        "filename": "PascalCase"
-      }
+    "circular-dependencies": {
+      "severity": "error",
+      "maxDepth": 10
     }
   },
   "output": {

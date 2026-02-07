@@ -22,7 +22,7 @@ export function isSourceCodeFile(filePath: string): boolean {
 // Handles pattern expansion: trailing "/*" is expanded to "/**/*" for deep matching.
 export function matchFileToPattern(
   filePath: string,
-  entries: { name: string; pattern: string }[],
+  entries: { name: string; pattern: string; }[],
   root: string,
 ): string | undefined {
   const relativePath = path.relative(root, filePath).replace(/\\/g, '/');
@@ -40,28 +40,60 @@ export function matchFileToPattern(
   return undefined;
 }
 
-// Resolves a relative import specifier to an absolute file path.
-// Tries exact match, then extensions, then directory index files.
+// Resolves an import specifier to an absolute file path.
+// Handles relative imports and configured aliases.
 // Returns undefined if the file cannot be found.
 export function resolveImport(
   importPath: string,
   fromFile: string,
   knownFiles: Set<string>,
+  root: string,
+  aliases: Record<string, string> = {},
 ): string | undefined {
-  const dir = path.dirname(fromFile);
-  const resolved = path.resolve(dir, importPath);
-  const normalized = resolved.replace(/\\/g, '/');
+  let targetPath = importPath;
 
-  // Try exact match first
+  // 1. Handle Alises
+  for (const [alias, replacement] of Object.entries(aliases)) {
+    // Exact match: "@/features" -> "src/features"
+    if (alias.endsWith('/*') && replacement.endsWith('/*')) {
+      const aliasPrefix = alias.slice(0, -2);
+      const replacementPrefix = replacement.slice(0, -2);
+      if (importPath.startsWith(aliasPrefix)) {
+        targetPath = importPath.replace(aliasPrefix, replacementPrefix);
+        // If it was an alias, it's now a root-relative path (usually starting with src/)
+        // We should resolve it relative to root
+        return resolveFile(path.resolve(root, targetPath), knownFiles);
+      }
+    } else if (importPath === alias) {
+      targetPath = replacement;
+      return resolveFile(path.resolve(root, targetPath), knownFiles);
+    }
+  }
+
+  // 2. Handle Relative Imports
+  if (importPath.startsWith('.')) {
+    const dir = path.dirname(fromFile);
+    const resolved = path.resolve(dir, importPath);
+    return resolveFile(resolved, knownFiles);
+  }
+
+  return undefined;
+}
+
+// Helper to check exact file, extensions, and index files
+function resolveFile(absolutePath: string, knownFiles: Set<string>): string | undefined {
+  const normalized = absolutePath.replace(/\\/g, '/');
+
+  // Try exact match
   if (knownFiles.has(normalized)) return normalized;
 
-  // Try adding extensions
+  // Try extensions
   for (const ext of RESOLVE_EXTENSIONS) {
     const candidate = normalized + ext;
     if (knownFiles.has(candidate)) return candidate;
   }
 
-  // Try as a directory with index file
+  // Try index files
   for (const indexFile of INDEX_FILES) {
     const candidate = normalized + '/' + indexFile;
     if (knownFiles.has(candidate)) return candidate;
@@ -77,8 +109,8 @@ export function extractImports(
   filePath: string,
   root: string,
   ruleId = 'scanner',
-): { specifier: string; line: number }[] {
-  const imports: { specifier: string; line: number }[] = [];
+): { specifier: string; line: number; }[] {
+  const imports: { specifier: string; line: number; }[] = [];
 
   try {
     // Skip oversized files to prevent memory exhaustion

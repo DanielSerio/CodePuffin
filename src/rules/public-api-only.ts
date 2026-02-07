@@ -88,10 +88,13 @@ export class PublicApiOnlyRule implements Rule {
       const imports = extractImports(filePath, context.root, this.id);
 
       for (const { specifier, line } of imports) {
-        // Skip non-relative imports (npm packages, aliases)
-        if (!specifier.startsWith('.')) continue;
-
-        const resolvedPath = resolveImport(specifier, filePath, knownFiles);
+        const resolvedPath = resolveImport(
+          specifier,
+          filePath,
+          knownFiles,
+          context.root,
+          context.config.project?.aliases
+        );
         if (!resolvedPath) continue;
 
         // Check if the import target is inside a protected module

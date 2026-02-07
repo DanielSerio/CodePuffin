@@ -1,5 +1,5 @@
 import type { Plugin } from 'vite';
-import { Scanner } from '../core/scanner';
+import { Scanner, isSourceFile } from '../core/scanner';
 import type { RuleResult } from '../core/rules';
 import { loadConfig, createRunner } from '../core/bootstrap';
 import { writeReportFile } from '../core/reporter';
@@ -69,10 +69,31 @@ export default function codePuffinPlugin(options: VitePluginOptions = {}): Plugi
       await runScan(process.cwd());
     },
 
-    handleHotUpdate({ server }) {
+    handleHotUpdate({ server, file }) {
+      const root = server.config.root;
+      const configPath = path.resolve(root, options.configPath || 'puffin.json');
+
+      const normalizedConfigPath = configPath.replace(/\\/g, '/');
+      const normalizedFile = file.replace(/\\/g, '/');
+      const relativeFile = path.relative(root, file).replace(/\\/g, '/');
+
+      // 1. Always trigger on config changes
+      const isConfigChange = normalizedFile === normalizedConfigPath;
+
+      // 2. Ignore report directory to prevent feedback loop
+      // By default, reports are written to 'reports/'. We skip this to avoid re-triggering.
+      const isReportChange = relativeFile.startsWith('reports/');
+
+      // 3. Only trigger on relevant source files (ts, js, css, etc.)
+      const isRelevantSource = isSourceFile(file);
+
+      if (!isConfigChange && (isReportChange || !isRelevantSource)) {
+        return;
+      }
+
       if (debounceTimer) clearTimeout(debounceTimer);
       debounceTimer = setTimeout(() => {
-        runScan(server.config.root).catch(err => {
+        runScan(root).catch(err => {
           console.warn(pc.yellow(`[CodePuffin] HMR scan failed: ${err}`));
         });
       }, DEBOUNCE_MS);

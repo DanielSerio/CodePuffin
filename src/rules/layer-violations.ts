@@ -6,19 +6,19 @@ import { extractImports, resolveImport, isSourceCodeFile, matchFileToPattern } f
 function isImportAllowed(
   sourceLayer: string,
   targetLayer: string,
-  allowed: { from: string; to: string[] }[],
+  allowed: { importer: string; imports: string[]; }[],
 ): boolean {
   // Same layer is always allowed
   if (sourceLayer === targetLayer) return true;
 
   // Find the rule for this source layer
-  const rule = allowed.find(r => r.from === sourceLayer);
+  const rule = allowed.find(r => r.importer === sourceLayer);
   if (!rule) {
     // No rule defined means all imports are forbidden
     return false;
   }
 
-  return rule.to.includes(targetLayer);
+  return rule.imports.includes(targetLayer);
 }
 
 export class LayerViolationsRule implements Rule {
@@ -41,10 +41,13 @@ export class LayerViolationsRule implements Rule {
       const imports = extractImports(filePath, context.root, this.id);
 
       for (const { specifier, line } of imports) {
-        // Skip non-relative imports (npm packages, aliases)
-        if (!specifier.startsWith('.')) continue;
-
-        const resolvedPath = resolveImport(specifier, filePath, knownFiles);
+        const resolvedPath = resolveImport(
+          specifier,
+          filePath,
+          knownFiles,
+          context.root,
+          context.config.project?.aliases
+        );
         if (!resolvedPath) continue;
 
         const targetLayer = matchFileToPattern(resolvedPath, layers, context.root);

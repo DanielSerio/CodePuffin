@@ -26,10 +26,13 @@ export class ModuleBoundariesRule implements Rule {
       const imports = extractImports(filePath, context.root, this.id);
 
       for (const { specifier, line } of imports) {
-        // Skip non-relative imports (npm packages, aliases)
-        if (!specifier.startsWith('.')) continue;
-
-        const resolvedPath = resolveImport(specifier, filePath, knownFiles);
+        const resolvedPath = resolveImport(
+          specifier,
+          filePath,
+          knownFiles,
+          context.root,
+          context.config.project?.aliases
+        );
         if (!resolvedPath) continue;
 
         const targetModule = matchFileToPattern(resolvedPath, moduleEntries, context.root);
@@ -37,8 +40,8 @@ export class ModuleBoundariesRule implements Rule {
 
         // Check boundary rules
         for (const rule of boundaryRules) {
-          const fromMatches = minimatch(sourceModule, rule.from) || sourceModule === rule.from;
-          const toMatches = minimatch(targetModule, rule.to) || targetModule === rule.to;
+          const fromMatches = minimatch(sourceModule, rule.importer) || sourceModule === rule.importer;
+          const toMatches = minimatch(targetModule, rule.imports) || targetModule === rule.imports;
 
           if (fromMatches && toMatches && !rule.allow) {
             const message = rule.message

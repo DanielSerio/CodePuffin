@@ -2,8 +2,8 @@ import { z } from 'zod';
 
 // Module boundary rule configuration
 const ModuleBoundaryRuleSchema = z.object({
-  from: z.string(),
-  to: z.string(),
+  importer: z.string(),
+  imports: z.string(),
   allow: z.boolean(),
   message: z.string().optional(),
 });
@@ -16,14 +16,15 @@ const LayerSchema = z.object({
 
 // Layer allowed import rule
 const LayerAllowedSchema = z.object({
-  from: z.string(),
-  to: z.array(z.string()),
+  importer: z.string(),
+  imports: z.array(z.string()),
 });
 
 export const ConfigSchema = z.object({
   project: z.object({
     include: z.array(z.string()).default(['src/**/*']),
     exclude: z.array(z.string()).default(['node_modules', 'dist', '**/*.test.*']),
+    aliases: z.record(z.string()).default({ '@/*': 'src/*' }),
   }).default({}),
   modules: z.record(z.string()).optional(),
   rules: z.object({
