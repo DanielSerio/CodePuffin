@@ -7,7 +7,8 @@
       "Bash(node:*)",
       "Bash(grep:*)",
       "Bash(pnpm add:*)",
-      "Bash(pnpm build:*)"
+      "Bash(pnpm build:*)",
+      "Bash(pnpm install:*)"
     ]
   }
 }

@@ -58,6 +58,10 @@ export default function codePuffinPlugin(options: VitePluginOptions = {}): Plugi
     }
   }
 
+  // Debounce HMR re-scans to avoid running a full scan on every file change
+  let debounceTimer: ReturnType<typeof setTimeout> | undefined;
+  const DEBOUNCE_MS = 500;
+
   return {
     name: 'vite-plugin-codepuffin',
 
@@ -65,8 +69,13 @@ export default function codePuffinPlugin(options: VitePluginOptions = {}): Plugi
       await runScan(process.cwd());
     },
 
-    async handleHotUpdate({ server }) {
-      await runScan(server.config.root);
+    handleHotUpdate({ server }) {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        runScan(server.config.root).catch(err => {
+          console.warn(pc.yellow(`[CodePuffin] HMR scan failed: ${err}`));
+        });
+      }, DEBOUNCE_MS);
     },
   };
 }

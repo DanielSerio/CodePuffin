@@ -16,6 +16,11 @@ interface NextConfig {
   [key: string]: unknown;
 }
 
+// NOTE: This plugin hooks into Next.js via the `rewrites()` config function, which is
+// called once during startup. This is a pragmatic approach since Next.js does not expose
+// a general-purpose "on build start" hook. If Next.js changes when/how `rewrites` is
+// invoked, this integration may need to be updated. A webpack/turbopack plugin hook
+// would be more conventional but significantly more complex to implement.
 export default function withCodePuffin(nextConfig: NextConfig = {}, options: NextPluginOptions = {}) {
   return {
     ...nextConfig,

@@ -1,31 +1,7 @@
-import path from 'path';
 import { minimatch } from 'minimatch';
 import { Rule, RuleResult } from '../core/rules';
 import { ScanContext } from '../core/scanner';
-import { extractImports, resolveImport } from '../utils/imports';
-
-// Finds which module a file belongs to
-function findModule(
-  filePath: string,
-  modulePatterns: Record<string, string>,
-  root: string,
-): string | undefined {
-  const relativePath = path.relative(root, filePath).replace(/\\/g, '/');
-
-  for (const [moduleName, pattern] of Object.entries(modulePatterns)) {
-    // Handle patterns like "src/features/*" which should match "src/features/auth/index.ts"
-    // by converting to "src/features/**/*"
-    const expandedPattern = pattern.endsWith('/*')
-      ? pattern.slice(0, -2) + '/**/*'
-      : pattern;
-
-    if (minimatch(relativePath, expandedPattern) || minimatch(relativePath, pattern)) {
-      return moduleName;
-    }
-  }
-
-  return undefined;
-}
+import { extractImports, resolveImport, isSourceCodeFile, matchFileToPattern } from '../utils/imports';
 
 export class ModuleBoundariesRule implements Rule {
   id = 'module-boundaries';
@@ -38,11 +14,13 @@ export class ModuleBoundariesRule implements Rule {
     const results: RuleResult[] = [];
     const knownFiles = new Set(context.files.map(f => f.replace(/\\/g, '/')));
 
-    for (const filePath of context.files) {
-      // Only check TypeScript/JavaScript files
-      if (!/\.(ts|tsx|js|jsx|mjs|cjs)$/.test(filePath)) continue;
+    // Convert Record<string, string> to { name, pattern }[] for matchFileToPattern
+    const moduleEntries = Object.entries(modulePatterns).map(([name, pattern]) => ({ name, pattern }));
 
-      const sourceModule = findModule(filePath, modulePatterns, context.root);
+    for (const filePath of context.files) {
+      if (!isSourceCodeFile(filePath)) continue;
+
+      const sourceModule = matchFileToPattern(filePath, moduleEntries, context.root);
       if (!sourceModule) continue;
 
       const imports = extractImports(filePath, context.root, this.id);
@@ -54,7 +32,7 @@ export class ModuleBoundariesRule implements Rule {
         const resolvedPath = resolveImport(specifier, filePath, knownFiles);
         if (!resolvedPath) continue;
 
-        const targetModule = findModule(resolvedPath, modulePatterns, context.root);
+        const targetModule = matchFileToPattern(resolvedPath, moduleEntries, context.root);
         if (!targetModule) continue;
 
         // Check boundary rules
@@ -72,6 +50,7 @@ export class ModuleBoundariesRule implements Rule {
               line,
               message: `${message} (importing "${specifier}")`,
               severity,
+              suggestion: `Remove the import or update module boundary rules to allow "${sourceModule}" -> "${targetModule}"`,
             });
           }
         }

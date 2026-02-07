@@ -136,11 +136,19 @@ export function writeReportFile(config: Config, results: RuleResult[], root: str
 
   const filePath = path.resolve(root, finalFileName);
 
+  // Prevent writing outside project root (path traversal via ".." or absolute paths)
+  const resolvedRoot = path.resolve(root);
+  if (!filePath.startsWith(resolvedRoot + path.sep) && filePath !== resolvedRoot) {
+    console.warn(pc.yellow(`\n⚠️ Report path "${finalFileName}" resolves outside project root, skipping.`));
+    return;
+  }
+
   try {
     mkdirSync(path.dirname(filePath), { recursive: true });
     writeFileSync(filePath, content, 'utf-8');
     console.log(pc.green(`\n📝 Report written to ${pc.bold(finalFileName)}`));
-  } catch (err: any) {
-    console.warn(pc.yellow(`\n⚠️ Failed to write report file: ${err.message}`));
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.warn(pc.yellow(`\n⚠️ Failed to write report file: ${message}`));
   }
 }

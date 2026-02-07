@@ -1,12 +1,44 @@
 import ts from 'typescript';
 import path from 'path';
 import pc from 'picocolors';
-import { readFileSync } from 'fs';
+import { readFileSync, statSync } from 'fs';
+import { minimatch } from 'minimatch';
 
 // Extensions to try when resolving relative imports
 export const RESOLVE_EXTENSIONS = ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs'];
 // Index filenames to try when resolving directory imports
 export const INDEX_FILES = RESOLVE_EXTENSIONS.map(ext => `index${ext}`);
+
+// Maximum file size (2MB) — files larger than this are skipped to avoid memory exhaustion
+const MAX_FILE_SIZE_BYTES = 2 * 1024 * 1024;
+
+// Returns true if the file has a TypeScript or JavaScript extension
+export function isSourceCodeFile(filePath: string): boolean {
+  return RESOLVE_EXTENSIONS.some(ext => filePath.endsWith(ext));
+}
+
+// Matches a file against a list of named glob patterns.
+// Returns the name of the first matching pattern, or undefined.
+// Handles pattern expansion: trailing "/*" is expanded to "/**/*" for deep matching.
+export function matchFileToPattern(
+  filePath: string,
+  entries: { name: string; pattern: string }[],
+  root: string,
+): string | undefined {
+  const relativePath = path.relative(root, filePath).replace(/\\/g, '/');
+
+  for (const { name, pattern } of entries) {
+    const expandedPattern = pattern.endsWith('/*')
+      ? pattern.slice(0, -2) + '/**/*'
+      : pattern;
+
+    if (minimatch(relativePath, expandedPattern) || minimatch(relativePath, pattern)) {
+      return name;
+    }
+  }
+
+  return undefined;
+}
 
 // Resolves a relative import specifier to an absolute file path.
 // Tries exact match, then extensions, then directory index files.
@@ -40,6 +72,7 @@ export function resolveImport(
 
 // Extracts all import/export/dynamic-import specifiers from a TypeScript/JavaScript file.
 // The ruleId parameter controls the warning label when a file can't be parsed.
+// Skips files larger than MAX_FILE_SIZE_BYTES to avoid memory exhaustion.
 export function extractImports(
   filePath: string,
   root: string,
@@ -48,6 +81,15 @@ export function extractImports(
   const imports: { specifier: string; line: number }[] = [];
 
   try {
+    // Skip oversized files to prevent memory exhaustion
+    const stats = statSync(filePath);
+    if (stats.size > MAX_FILE_SIZE_BYTES) {
+      const rel = path.relative(root, filePath);
+      const sizeMb = (stats.size / 1024 / 1024).toFixed(1);
+      console.warn(pc.yellow(`[${ruleId}] Skipping oversized file (${sizeMb}MB): ${rel}`));
+      return imports;
+    }
+
     const content = readFileSync(filePath, 'utf-8');
     const sourceFile = ts.createSourceFile(filePath, content, ts.ScriptTarget.Latest, true);
 

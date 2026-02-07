@@ -7,6 +7,7 @@ import path from 'path';
 vi.mock('fs', () => ({
   readFileSync: vi.fn(),
   existsSync: vi.fn(),
+  statSync: vi.fn(() => ({ size: 100 })),
 }));
 
 // Helper to get platform-specific absolute path normalized to forward slashes

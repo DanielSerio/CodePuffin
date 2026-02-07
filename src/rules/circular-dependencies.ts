@@ -1,11 +1,8 @@
-import ts from 'typescript';
 import path from 'path';
-import pc from 'picocolors';
-import { readFileSync } from 'fs';
 import { minimatch } from 'minimatch';
 import { Rule, RuleResult } from '../core/rules';
 import { ScanContext } from '../core/scanner';
-import { resolveImport } from '../utils/imports';
+import { resolveImport, extractImports } from '../utils/imports';
 
 // Builds a directed graph of imports between files.
 // Only includes edges for relative imports to files within the project.
@@ -18,66 +15,31 @@ export function buildImportGraph(
 
   for (const filePath of files) {
     const normalizedPath = filePath.replace(/\\/g, '/');
-    if (!graph.has(normalizedPath)) {
-      graph.set(normalizedPath, new Set());
-    }
+    const edges = new Set<string>();
+    graph.set(normalizedPath, edges);
 
-    try {
-      const content = readFileSync(filePath, 'utf-8');
-      const sourceFile = ts.createSourceFile(filePath, content, ts.ScriptTarget.Latest, true);
+    const imports = extractImports(filePath, root, 'circular-dependencies');
+    for (const { specifier } of imports) {
+      // Only process relative imports
+      if (!specifier.startsWith('.')) continue;
 
-      const walk = (node: ts.Node) => {
-        // Handle import declarations: import x from './y'
-        if (ts.isImportDeclaration(node) && node.moduleSpecifier) {
-          const specifier = (node.moduleSpecifier as ts.StringLiteral).text;
-          addEdge(normalizedPath, specifier, knownFiles, graph);
-        }
-
-        // Handle export declarations with module specifier: export { x } from './y'
-        if (ts.isExportDeclaration(node) && node.moduleSpecifier) {
-          const specifier = (node.moduleSpecifier as ts.StringLiteral).text;
-          addEdge(normalizedPath, specifier, knownFiles, graph);
-        }
-
-        // Handle dynamic imports: import('./y')
-        if (ts.isCallExpression(node) && node.expression.kind === ts.SyntaxKind.ImportKeyword && node.arguments.length > 0) {
-          const arg = node.arguments[0];
-          if (ts.isStringLiteral(arg)) {
-            addEdge(normalizedPath, arg.text, knownFiles, graph);
-          }
-        }
-
-        ts.forEachChild(node, walk);
-      };
-
-      walk(sourceFile);
-    } catch (err) {
-      const rel = path.relative(root, filePath);
-      console.warn(pc.yellow(`[circular-dependencies] Skipping unparseable file: ${rel}`));
+      const resolved = resolveImport(specifier, normalizedPath, knownFiles);
+      if (resolved) {
+        edges.add(resolved);
+      }
     }
   }
 
   return graph;
 }
 
-// Adds a directed edge from source to the resolved target (if it's a relative import)
-function addEdge(
-  fromFile: string,
-  specifier: string,
-  knownFiles: Set<string>,
-  graph: Map<string, Set<string>>,
-) {
-  // Only process relative imports
-  if (!specifier.startsWith('.')) return;
-
-  const resolved = resolveImport(specifier, fromFile, knownFiles);
-  if (resolved) {
-    graph.get(fromFile)!.add(resolved);
-  }
-}
-
-// Detects all unique cycles in the directed graph using DFS with back-edge detection.
+// Detects cycles in the directed graph using DFS with back-edge detection.
 // Each cycle is normalized so the lexicographically smallest path is first, for deduplication.
+//
+// NOTE: This uses a simple DFS that permanently marks nodes as visited. If a node is
+// reachable via multiple paths, cycles through later paths may not be discovered. For most
+// practical codebases this finds the significant cycles, but it is not an exhaustive
+// algorithm (e.g., Johnson's algorithm would enumerate all elementary cycles).
 export function detectCycles(graph: Map<string, Set<string>>): string[][] {
   const visited = new Set<string>();
   const inStack = new Set<string>();
@@ -174,9 +136,10 @@ export class CircularDependenciesRule implements Rule {
 
       return {
         ruleId: this.id,
-        file: cycle[0], // Report against the first file in the normalized cycle
+        file: cycle[0],
         message: `Circular dependency detected: ${chain}`,
         severity,
+        suggestion: 'Break the cycle by extracting shared code into a separate module or using dependency injection',
       };
     });
   }

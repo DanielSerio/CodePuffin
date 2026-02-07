@@ -2,7 +2,7 @@ import path from 'path';
 import { minimatch } from 'minimatch';
 import { Rule, RuleResult } from '../core/rules';
 import { ScanContext } from '../core/scanner';
-import { extractImports, resolveImport } from '../utils/imports';
+import { extractImports, resolveImport, isSourceCodeFile } from '../utils/imports';
 
 // Checks if a file path matches any of the module patterns
 function isInProtectedModule(
@@ -80,8 +80,7 @@ export class PublicApiOnlyRule implements Rule {
     const knownFiles = new Set(context.files.map(f => f.replace(/\\/g, '/')));
 
     for (const filePath of context.files) {
-      // Only check TypeScript/JavaScript files
-      if (!/\.(ts|tsx|js|jsx|mjs|cjs)$/.test(filePath)) continue;
+      if (!isSourceCodeFile(filePath)) continue;
 
       // Skip exempt files
       if (isExemptFile(filePath, exceptions, context.root)) continue;

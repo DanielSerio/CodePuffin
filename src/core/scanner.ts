@@ -27,7 +27,8 @@ export class Scanner {
   private config: Config;
 
   constructor(root: string, config: Config) {
-    this.root = path.resolve(root);
+    // Normalize root to forward slashes to match discovered file paths
+    this.root = path.resolve(root).replace(/\\/g, '/');
     this.config = config;
   }
 
@@ -35,6 +36,16 @@ export class Scanner {
     const normalizeGlob = (p: string) => p.replace(/\\/g, '/');
     const include = (this.config.project?.include || ['src/**/*']).map(normalizeGlob);
     const exclude = (this.config.project?.exclude || ['node_modules', 'dist', '**/*.test.*']).map(normalizeGlob);
+
+    // Validate that glob patterns don't attempt to escape the project root
+    for (const pattern of [...include, ...exclude]) {
+      if (pattern.includes('..')) {
+        throw new Error(`Glob pattern "${pattern}" must not contain ".." to prevent path traversal`);
+      }
+      if (path.isAbsolute(pattern)) {
+        throw new Error(`Glob pattern "${pattern}" must be relative to the project root`);
+      }
+    }
 
     // 1. Get all files matching project patterns, filtered to source code only
     const allFiles = await fg(include, {
