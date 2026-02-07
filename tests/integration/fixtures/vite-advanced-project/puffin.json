@@ -3,9 +3,15 @@
     "include": ["src/**/*"]
   },
   "rules": {
-    "naming-convention": {
+    "module-boundaries": {
       "severity": "error",
-      "files": "kebab-case"
+      "modules": {
+        "@features": "src/features/*",
+        "@shared": "src/shared/*"
+      },
+      "rules": [
+        { "from": "@features", "to": "@features", "allow": false, "message": "Features cannot import other features" }
+      ]
     }
   }
 }

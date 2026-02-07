@@ -4,7 +4,10 @@
       "Bash(npx tsc:*)",
       "Bash(pnpm test:unit:*)",
       "Bash(pnpm test:integration:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(grep:*)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm build:*)"
     ]
   }
 }

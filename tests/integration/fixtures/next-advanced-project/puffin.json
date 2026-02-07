@@ -1,7 +1,16 @@
 {
+  "project": {
+    "include": ["src/**/*"]
+  },
   "rules": {
-    "no-any": {
-      "severity": "error"
+    "module-boundaries": {
+      "severity": "error",
+      "modules": {
+        "@features": "src/features/*"
+      },
+      "rules": [
+        { "from": "@features", "to": "@features", "allow": false, "message": "Features cannot import other features" }
+      ]
     }
   }
 }

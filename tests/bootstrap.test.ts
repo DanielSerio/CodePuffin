@@ -12,11 +12,21 @@ describe('createRunner', () => {
   it('creates a runner with enabled rules', () => {
     const config = ConfigSchema.parse({
       rules: {
-        'line-limits': { severity: 'warn' },
-        'naming-convention': { severity: 'warn' },
-        'dead-code': { severity: 'error' },
-        'complexity': { severity: 'warn' },
         'circular-dependencies': { severity: 'error' },
+        'module-boundaries': {
+          severity: 'error',
+          modules: { '@features': 'src/features/*' },
+          rules: [{ from: '@features', to: '@features', allow: false }],
+        },
+        'layer-violations': {
+          severity: 'warn',
+          layers: [{ name: 'ui', pattern: 'src/ui/**' }],
+          allowed: [{ from: 'ui', to: ['services'] }],
+        },
+        'public-api-only': {
+          severity: 'warn',
+          modules: ['src/features/*'],
+        },
       },
     });
 

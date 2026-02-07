@@ -1,7 +1,6 @@
 {
   "rules": {
-    "line-limits": {
-      "default": 1,
+    "circular-dependencies": {
       "severity": "warn"
     }
   }

@@ -1,18 +1,24 @@
 import { z } from 'zod';
 
-// Per-module overrides for naming conventions
-const NamingOverrideSchema = z.object({
-  files: z.string().optional(),
-  variables: z.string().optional(),
-  functions: z.string().optional(),
-  classes: z.string().optional(),
-  components: z.object({
-    entity: z.string().optional(),
-    filename: z.string().optional(),
-  }).optional(),
+// Module boundary rule configuration
+const ModuleBoundaryRuleSchema = z.object({
+  from: z.string(),
+  to: z.string(),
+  allow: z.boolean(),
+  message: z.string().optional(),
 });
 
-export type NamingOverride = z.infer<typeof NamingOverrideSchema>;
+// Layer definition for layer-violations rule
+const LayerSchema = z.object({
+  name: z.string(),
+  pattern: z.string(),
+});
+
+// Layer allowed import rule
+const LayerAllowedSchema = z.object({
+  from: z.string(),
+  to: z.array(z.string()),
+});
 
 export const ConfigSchema = z.object({
   project: z.object({
@@ -21,46 +27,30 @@ export const ConfigSchema = z.object({
   }).default({}),
   modules: z.record(z.string()).optional(),
   rules: z.object({
-    'dead-code': z.object({
-      severity: z.enum(['error', 'warn']).default('error'),
-      exclude: z.array(z.string()).optional(),
-      unusedExports: z.boolean().default(true),
-      unusedVariables: z.boolean().default(true),
-    }).optional(),
-    'line-limits': z.object({
-      severity: z.enum(['error', 'warn']).default('warn'),
-      default: z.number().default(100),
-      overrides: z.record(z.number()).optional(),
-    }).optional(),
-    'naming-convention': z.object({
-      severity: z.enum(['error', 'warn']).default('warn'),
-      files: z.string().default('kebab-case'),
-      variables: z.string().default('camelCase'),
-      functions: z.string().default('camelCase'),
-      classes: z.string().default('PascalCase'),
-      components: z.object({
-        entity: z.string().optional(),
-        filename: z.string().optional(),
-      }).optional(),
-      overrides: z.record(NamingOverrideSchema).optional(),
-    }).optional(),
-    'complexity': z.object({
-      severity: z.enum(['error', 'warn']).default('warn'),
-      cyclomatic: z.number().default(10),
-      cognitive: z.number().default(15),
-      overrides: z.record(z.object({
-        cyclomatic: z.number().optional(),
-        cognitive: z.number().optional(),
-      })).optional(),
-    }).optional(),
+    // Architectural rules (kept)
     'circular-dependencies': z.object({
       severity: z.enum(['error', 'warn']).default('error'),
+      maxDepth: z.number().optional(),
+      ignorePaths: z.array(z.string()).optional(),
     }).optional(),
-    'no-any': z.object({
+
+    // New architectural rules
+    'module-boundaries': z.object({
       severity: z.enum(['error', 'warn']).default('error'),
+      modules: z.record(z.string()).describe('Named module patterns, e.g., { "@features": "src/features/*" }'),
+      rules: z.array(ModuleBoundaryRuleSchema).describe('Import rules between modules'),
     }).optional(),
-    'no-enum': z.object({
+
+    'layer-violations': z.object({
       severity: z.enum(['error', 'warn']).default('error'),
+      layers: z.array(LayerSchema).describe('Layer definitions with name and glob pattern'),
+      allowed: z.array(LayerAllowedSchema).describe('Allowed import directions between layers'),
+    }).optional(),
+
+    'public-api-only': z.object({
+      severity: z.enum(['error', 'warn']).default('error'),
+      modules: z.array(z.string()).describe('Glob patterns for modules that must be imported via index'),
+      exceptions: z.array(z.string()).optional().describe('File patterns exempt from this rule'),
     }).optional(),
   }).default({}),
   output: z.object({

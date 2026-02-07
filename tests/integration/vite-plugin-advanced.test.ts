@@ -53,7 +53,11 @@ export default defineConfig({
     fs.writeFileSync(customConfigPath, JSON.stringify({
       project: { include: ["src/**/*"] },
       rules: {
-        "naming-convention": { severity: "warn", files: "kebab-case" }
+        "module-boundaries": {
+          severity: "warn",
+          modules: { "@features": "src/features/*" },
+          rules: [{ from: "@features", to: "@features", allow: false }]
+        }
       }
     }));
 
@@ -82,7 +86,7 @@ export default defineConfig({
       // Status 0 because we changed severity to warn in the custom config
       expect(result.status).toBe(0);
       expect(result.stdout).toContain('CodePuffin');
-      expect(result.stdout).toContain('WARN naming-convention');
+      expect(result.stdout).toContain('WARN module-boundaries');
     } finally {
       fs.unlinkSync(customConfigPath);
       fs.unlinkSync(viteConfigPath);

@@ -1,6 +1,6 @@
 {
   "rules": {
-    "line-limits": {
+    "circular-dependencies": {
       "severity": "super-error"
     }
   }

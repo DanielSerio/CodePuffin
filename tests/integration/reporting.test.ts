@@ -64,7 +64,7 @@ test('writes a Markdown report with a stable filename (no timestamp)', () => {
   const { writeFileSync } = require('fs');
   writeFileSync(mdConfigPath, JSON.stringify({
     project: { include: ['src/**/*'] },
-    rules: { 'line-limits': { severity: 'warn', default: 5 } },
+    rules: { 'circular-dependencies': { severity: 'warn' } },
     output: { format: 'markdown', reportFile: 'reports/scan-[timestamp].md' },
   }));
 
@@ -85,7 +85,7 @@ test('writes a Markdown report with a stable filename (no timestamp)', () => {
     const reportContent = readFileSync(path.join(reportsDir, 'scan-[timestamp].md'), 'utf-8');
     expect(reportContent).toContain('# 🐧 CodePuffin Scan Report');
     expect(reportContent).toContain('**Total Issues**:');
-    expect(reportContent).toContain('line-limits');
+    expect(reportContent).toContain('circular-dependencies');
   } finally {
     // Clean up temp config
     try { rmSync(mdConfigPath); } catch { /* ignore */ }

@@ -1,43 +1,11 @@
 import ts from 'typescript';
 import path from 'path';
 import pc from 'picocolors';
-import { readFileSync, existsSync } from 'fs';
+import { readFileSync } from 'fs';
+import { minimatch } from 'minimatch';
 import { Rule, RuleResult } from '../core/rules';
 import { ScanContext } from '../core/scanner';
-
-// Extensions to try when resolving relative imports
-const RESOLVE_EXTENSIONS = ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs'];
-// Index filenames to try when resolving directory imports
-const INDEX_FILES = RESOLVE_EXTENSIONS.map(ext => `index${ext}`);
-
-// Resolves a relative import specifier to an absolute file path.
-// Returns undefined if the file cannot be found.
-export function resolveImport(
-  importPath: string,
-  fromFile: string,
-  knownFiles: Set<string>,
-): string | undefined {
-  const dir = path.dirname(fromFile);
-  const resolved = path.resolve(dir, importPath);
-  const normalized = resolved.replace(/\\/g, '/');
-
-  // Try exact match first
-  if (knownFiles.has(normalized)) return normalized;
-
-  // Try adding extensions
-  for (const ext of RESOLVE_EXTENSIONS) {
-    const candidate = normalized + ext;
-    if (knownFiles.has(candidate)) return candidate;
-  }
-
-  // Try as a directory with index file
-  for (const indexFile of INDEX_FILES) {
-    const candidate = normalized + '/' + indexFile;
-    if (knownFiles.has(candidate)) return candidate;
-  }
-
-  return undefined;
-}
+import { resolveImport } from '../utils/imports';
 
 // Builds a directed graph of imports between files.
 // Only includes edges for relative imports to files within the project.
@@ -179,9 +147,24 @@ export class CircularDependenciesRule implements Rule {
     const config = context.config.rules?.['circular-dependencies'];
     if (!config) return [];
 
-    const { severity } = config;
-    const graph = buildImportGraph(context.files, context.root);
-    const cycles = detectCycles(graph);
+    const { severity, maxDepth, ignorePaths } = config;
+
+    // Filter out files matching ignorePaths patterns
+    let files = context.files;
+    if (ignorePaths && ignorePaths.length > 0) {
+      files = files.filter(f => {
+        const rel = path.relative(context.root, f).replace(/\\/g, '/');
+        return !ignorePaths.some(pattern => minimatch(rel, pattern));
+      });
+    }
+
+    const graph = buildImportGraph(files, context.root);
+    let cycles = detectCycles(graph);
+
+    // Filter cycles by maxDepth (max number of files in the cycle)
+    if (maxDepth !== undefined) {
+      cycles = cycles.filter(cycle => cycle.length <= maxDepth);
+    }
 
     return cycles.map(cycle => {
       // Build the display path chain with relative paths

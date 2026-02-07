@@ -5,22 +5,17 @@
     ]
   },
   "rules": {
-    "line-limits": {
+    "circular-dependencies": {
+      "severity": "error"
+    },
+    "module-boundaries": {
       "severity": "warn",
-      "default": 20
-    },
-    "naming-convention": {
-      "severity": "error",
-      "files": "kebab-case",
-      "variables": "camelCase",
-      "components": {
-        "entity": "PascalCase",
-        "filename": "PascalCase"
-      }
-    },
-    "dead-code": {
-      "severity": "error",
-      "unusedExports": true
+      "modules": {
+        "@features": "src/features/*"
+      },
+      "rules": [
+        { "from": "@features", "to": "@features", "allow": false }
+      ]
     }
   },
   "output": {

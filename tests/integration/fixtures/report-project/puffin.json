@@ -3,9 +3,8 @@
     "include": ["src/**/*"]
   },
   "rules": {
-    "line-limits": {
-      "severity": "warn",
-      "default": 5
+    "circular-dependencies": {
+      "severity": "warn"
     }
   },
   "output": {

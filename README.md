@@ -1,38 +1,47 @@
 # CodePuffin 🐧
 
-> **The Architectural Integrity Engine for the Agentic Era.**
+> **Enforce your architecture, not just your code style.**
 
 ## What is CodePuffin?
 
-**CodePuffin** is a high-performance static analysis engine designed to bridge the gap between human architectural vision and AI-driven code generation. While AI agents are domesticating the world of coding, CodePuffin ensures they stay within the boundaries of your design.
+**CodePuffin** is a high-performance architectural enforcement engine for TypeScript projects.
 
-By leveraging the **TypeScript Compiler API**, CodePuffin provides deep, deterministic, and near-instant feedback on your project's modular health without the overhead of external APIs or "black-box" LLM analysis.
+In the agentic era, code generation is fast, but architectural drift is faster. While ESLint catches bad code patterns and TypeScript ensures type safety, CodePuffin operates at the **module graph level** to ensure your codebase stays within the boundaries of your intended design.
+
+By leveraging the **TypeScript Compiler API**, CodePuffin provides deep, deterministic, and near-instant feedback on your project's modular health.
 
 ### 🌟 Why CodePuffin?
 
-- **🤖 Agent-Optimized**: Generates markdown reports specifically structured as "missions" for AI coding assistants, enabling autonomous refactoring pipelines.
-- **🚀 Blazing Fast**: Near-instant AST analysis. It's not just a linter; it's a real-time architectural guardrail that runs at the speed of thought.
-- **🔒 Privacy-First by Design**: 100% local. Your intellectual property never leaves your machine, making it the secure choice for high-stakes enterprise projects.
-- **🏗️ Architecturally Aware**: Move beyond simple linting. Enforce modular boundaries and layer-specific standards (UI vs. Data Layer) that traditional tools ignore.
-- **✅ Zero-Cost Determinism**: No tokens, no hallucinations, no subscriptions. Just pure, reproducible logic that ensures your codebase remains a masterpiece.
+- **🏗️ Architecturally Aware**: Move beyond simple linting. Enforce modular boundaries, layer-specific standards (UI vs. Data Layer), and Public API surfaces that traditional tools ignore.
+- **🤖 Agent-Optimized**: Generates high-fidelity markdown reports specifically structured for AI coding assistants, enabling autonomous architectural compliance.
+- **🚀 Blazing Fast**: Near-instant AST analysis. It's not just a checker; it's a real-time architectural guardrail that runs at the speed of thought.
+- **🔒 Privacy-First**: 100% local. Your intellectual property never leaves your machine. No tokens, no hallucinations, just pure logic.
 
-### 🔮 Built for 2026 and Beyond
+---
 
-In a world where code is increasingly machine-generated, **architectural drift** is the new technical debt. CodePuffin is the "source of truth" that empowers human architects to lead teams of AI agents with confidence, ensuring that every file adheres to the core principles of SOLID and clean design.
+## 📐 Core Principles
 
-### 🛠️ Core Capabilities
+| Tool           | Level     | Focus                       |
+| -------------- | --------- | --------------------------- |
+| ESLint         | File      | Code patterns & Style       |
+| TypeScript     | Type      | Type safety & correctness   |
+| **CodePuffin** | **Graph** | **Architectural integrity** |
 
-- **Zero-Waste Analysis**: Deep dead-code detection that identifies unused exports and variables across complex module trees.
-- **Structural Integrity**: Custom naming conventions and file structures tailored to your project's specific layers.
-- **Cognitive Guardrails**: Advanced complexity monitoring (Cyclomatic & Cognitive) to keep your logic human-readable and agent-maintainable.
-- **Enterprise Integration**: First-class support for Vite, Next.js, and CLI-driven CI/CD pipelines.
+---
 
-## interface
+## 🛠️ Core Capabilities
 
-CodePuffin has two interfaces:
+- **Import Boundaries**: Control which modules are allowed to talk to each other (e.g., Features cannot import from other Features).
+- **Layer Violations**: Enforce Clean/Layered architecture by ensuring dependencies only flow in one direction.
+- **Public API Enforcement**: Force imports through barrel exports (`index.ts`), preventing deep, brittle imports into internal module structures.
+- **Cycle Detection**: Advanced graph analysis to detect and visualize circular dependencies that lead to tight coupling.
 
-- CLI
-- Framework plugins (Vite Plugin, Next.js Plugin, etc)
+## Interface
+
+CodePuffin has two primary interfaces:
+
+- **CLI**: Standardized scanning for local development and CI/CD pipelines.
+- **Framework Plugins**: Real-time feedback integrated into Vite, Next.js, and more.
 
 ### CLI
 
@@ -41,12 +50,12 @@ CodePuffin has two interfaces:
 puffin scan
 
 # scan with custom config
-puffin scan --config /path/to/config.json
+puffin scan --config puffin.json
 ```
 
-### Framework plugins
+### Framework Plugins
 
-### Vite Plugin
+#### Vite Plugin
 
 ```typescript
 // vite.config.ts
@@ -64,49 +73,58 @@ export default defineConfig({
 
 ## Configuration
 
-CodePuffin uses a configuration file (`puffin.json`) to determine which rules to apply and how to apply them.
+CodePuffin uses `puffin.json` to define your architectural rules.
 
 ```json
 {
   "project": {
     "include": ["src/**/*"],
-    "exclude": ["node_modules", "dist", "**/*.test.*", "src/components/ui/**/*"]
+    "exclude": ["node_modules", "dist", "**/*.test.*"]
   },
   "modules": {
-    "ui": "src/components/ui/**/*",
-    "components": "src/components/**/*",
-    "hooks": "src/hooks/**/*",
-    "constants": "src/constants/**/*",
-    "contexts": "src/contexts/**/*",
-    "data-layer": "src/{repositories,services,schemas,stores}/**/*"
+    "features": "src/features/*",
+    "shared": "src/shared/*",
+    "core": "src/core/*"
   },
   "rules": {
-    "dead-code": {
+    "module-boundaries": {
       "severity": "error",
-      "exclude": ["@ui"],
-      "unusedExports": true,
-      "unusedVariables": true
+      "modules": {
+        "@features": "src/features/*",
+        "@shared": "src/shared/*",
+        "@core": "src/core/*"
+      },
+      "rules": [
+        {
+          "from": "@features",
+          "to": "@features",
+          "allow": false,
+          "message": "Features cannot import other features"
+        },
+        { "from": "@shared", "to": "@features", "allow": false },
+        { "from": "@features", "to": "@shared", "allow": true }
+      ]
     },
-    "line-limits": {
-      "severity": "warn",
-      "default": 100,
-      "overrides": {
-        "@constants": 200,
-        "@contexts": 150
-      }
+    "layer-violations": {
+      "severity": "error",
+      "layers": [
+        { "name": "ui", "pattern": "src/components/**" },
+        { "name": "domain", "pattern": "src/domain/**" },
+        { "name": "infra", "pattern": "src/infrastructure/**" }
+      ],
+      "allowed": [
+        { "from": "ui", "to": ["domain"] },
+        { "from": "infra", "to": ["domain"] }
+      ]
     },
-    "naming-convention": {
-      "severity": "warn",
-      "files": "kebab-case",
-      "variables": "camelCase",
-      "functions": "camelCase",
-      "classes": "PascalCase",
-      "overrides": {
-        "@components": { "files": "PascalCase" },
-        "@hooks": { "functions": "useCamelCase" },
-        "@constants": { "variables": "UPPER_SNAKE_CASE" },
-        "@contexts": { "functions": "useCamelCase" }
-      }
+    "public-api-only": {
+      "severity": "error",
+      "modules": ["src/features/*"],
+      "exceptions": ["**/*.test.ts"]
+    },
+    "circular-dependencies": {
+      "severity": "error",
+      "maxDepth": 10
     }
   },
   "output": {
@@ -122,17 +140,14 @@ CodePuffin uses a configuration file (`puffin.json`) to determine which rules to
 .
 ├── src/                 # Source code
 │   ├── cli/             # CLI entry points and command logic
-│   ├── core/            # Scanning engine and file system traversal
-│   ├── rules/           # Implementation of scanning rules
+│   ├── core/            # Scanning engine and module resolution
+│   ├── rules/           # Architectural rule implementations
 │   ├── plugins/         # Framework integrations (Vite, Next.js, etc.)
 │   └── utils/           # Shared internal utilities
-├── examples/            # Example apps for testing and development
-│   ├── basic/           # Simple vanilla TS project
-│   ├── nextjs-app/      # Next.js framework integration test app
-│   └── react-app/       # Vite/React framework integration test app
+├── examples/            # Example apps for testing
 ├── tests/               # Unit and integration tests
-├── package.json         # Project metadata and dependencies
-└── README.md            # Documentation
+├── puffin.json          # Your architectural manifest
+└── README.md            # You are here
 ```
 
 ## Development Stack
@@ -146,22 +161,22 @@ CodePuffin uses a configuration file (`puffin.json`) to determine which rules to
 
 ## Features
 
-### 📏 Rules
+### 📐 Rules (Current)
 
-- **Modular Line Limits**: Enforce strict file length boundaries with per-module overrides (e.g., higher limits for `@constants`).
-- **Deep Dead Code**: Trace export chains to find truly unused code that standard linters miss.
-- **Naming Enforcement**: Precision case-style control for files, variables, functions, and classes.
-- **Logic Complexity**: Quantitative metrics for cyclomatic and cognitive complexity with smart thresholds.
-- **Circular Insight**: Graph-based analysis to detect and visualize import cycles.
+- **Module Boundaries**: Prevent "spaghetti" dependencies between features.
+- **Layered Integrity**: Enforce top-down dependency flow (Clean/Hexagonal).
+- **Public API Guards**: Protect internal module implementation details.
+- **Circular Insight**: Detect and break tight coupling cycles.
 
-### 📊 Reporting Ecosystem
+### 📊 Reporting
 
-- **Stylish Console**: Real-time, color-coded terminal feedback for local development.
-- **Actionable JSON**: Structured data for integration into custom dashboarding or security tools.
-- **Agent-Ready Markdown**: High-fidelity reports designed to be fed back into AI coding agents for immediate resolution.
+- **Stylish Console**: Real-time terminal feedback.
+- **Agent-Ready Markdown**: Reports designed to be "missions" for AI coding agents.
+- **Actionable JSON**: For custom CI/CD integrations.
 
-### Integrations
+### 🗺️ Roadmap
 
-- **CLI**: Standalone scanning via `puffin scan`
-- **Vite Plugin**: Runs on build and dev server reload
-- **Next.js Plugin**: Runs during development and CI
+- **Feature Structure**: Enforce consistent internal folder layouts.
+- **I/O Boundaries**: Restrict Side Effects (fetch, localStorage) to specific layers.
+- **Puffin Graph**: Visual dependency graph generation (SVG/Mermaid).
+- **Framework Presets**: One-click config for Next.js, React, and Monorepos.

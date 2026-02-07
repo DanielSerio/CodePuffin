@@ -21,16 +21,15 @@ src/
     reporter.ts         - reportStylish (console), reportJson, reportMarkdown.
     bootstrap.ts        - loadConfig(), createRunner() (registers enabled rules), scan() pipeline.
   rules/
-    line-limits.ts      - File line count rule.
-    naming-convention.ts - File/var/func/class naming via AST.
-    dead-code.ts        - Unused exports via AST two-pass.
-    complexity.ts       - Cyclomatic + cognitive complexity per function via AST.
     circular-dependencies.ts - Import cycle detection via DFS on directed graph.
+    module-boundaries.ts     - Cross-module import restriction enforcement.
+    layer-violations.ts      - Architectural layer dependency direction enforcement.
+    public-api-only.ts       - Deep import detection, enforces index-based public APIs.
   plugins/
     vite.ts             - Vite build plugin.
     next.ts             - Next.js rewrites plugin.
   utils/
-    naming.ts           - Case style checkers (kebab, camel, Pascal, UPPER_SNAKE, useCamel).
+    imports.ts          - Shared import extraction and resolution utilities.
 ```
 
 ## Adding a New Rule

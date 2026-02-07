@@ -18,9 +18,6 @@ test('next.js plugin reports scan results when enabled', () => {
   // Plugin should print scan results header
   expect(output).toContain('CodePuffin');
 
-  // Naming violations should be reported
-  expect(output).toContain('naming-convention');
-
-  // The violating file should be mentioned
-  expect(output).toContain('BadComponent');
+  // Circular dependency violations should be reported
+  expect(output).toContain('circular-dependencies');
 });

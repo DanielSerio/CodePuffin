@@ -17,6 +17,7 @@ test.describe('Next.js Plugin Advanced', () => {
     expect(result.status).toBe(1);
     expect(result.stderr).toContain('Architectural scan failed with errors');
     expect(result.stdout).toContain('ERROR');
+    expect(result.stdout).toContain('module-boundaries');
   });
 
   test('plugin respects enabled: false option', () => {

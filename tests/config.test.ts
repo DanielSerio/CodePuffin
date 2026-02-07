@@ -12,7 +12,7 @@ describe('ConfigSchema', () => {
     }
   });
 
-  it('accepts a full valid config', () => {
+  it('accepts a full valid config with architectural rules', () => {
     const config = {
       project: {
         include: ['lib/**/*'],
@@ -20,9 +20,12 @@ describe('ConfigSchema', () => {
       },
       modules: { ui: 'lib/ui/**/*' },
       rules: {
-        'line-limits': { severity: 'error', default: 200 },
-        'naming-convention': { severity: 'warn', files: 'PascalCase' },
-        'dead-code': { severity: 'warn', unusedExports: false },
+        'circular-dependencies': { severity: 'error' },
+        'module-boundaries': {
+          severity: 'error',
+          modules: { '@features': 'src/features/*' },
+          rules: [{ from: '@features', to: '@features', allow: false }],
+        },
       },
       output: { format: 'json', reportFile: 'report.json' },
     };
@@ -30,16 +33,15 @@ describe('ConfigSchema', () => {
     const result = ConfigSchema.safeParse(config);
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.rules['line-limits']?.default).toBe(200);
-      expect(result.data.rules['naming-convention']?.files).toBe('PascalCase');
-      expect(result.data.rules['dead-code']?.unusedExports).toBe(false);
+      expect(result.data.rules['circular-dependencies']?.severity).toBe('error');
+      expect(result.data.rules['module-boundaries']?.severity).toBe('error');
     }
   });
 
   it('rejects invalid severity values', () => {
     const config = {
       rules: {
-        'line-limits': { severity: 'fatal' },
+        'circular-dependencies': { severity: 'fatal' },
       },
     };
 
@@ -50,98 +52,6 @@ describe('ConfigSchema', () => {
   it('rejects invalid output format', () => {
     const config = {
       output: { format: 'xml' },
-    };
-
-    const result = ConfigSchema.safeParse(config);
-    expect(result.success).toBe(false);
-  });
-
-  it('accepts naming-convention overrides with proper shape', () => {
-    const config = {
-      rules: {
-        'naming-convention': {
-          overrides: {
-            '@ui': { files: 'PascalCase', classes: 'PascalCase' },
-          },
-        },
-      },
-    };
-
-    const result = ConfigSchema.safeParse(config);
-    expect(result.success).toBe(true);
-  });
-
-  it('rejects naming-convention overrides with wrong types', () => {
-    const config = {
-      rules: {
-        'naming-convention': {
-          overrides: {
-            '@ui': { files: 123 },
-          },
-        },
-      },
-    };
-
-    const result = ConfigSchema.safeParse(config);
-    expect(result.success).toBe(false);
-  });
-
-  it('accepts complexity rule with defaults', () => {
-    const config = {
-      rules: {
-        'complexity': {},
-      },
-    };
-
-    const result = ConfigSchema.safeParse(config);
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.rules['complexity']?.severity).toBe('warn');
-      expect(result.data.rules['complexity']?.cyclomatic).toBe(10);
-      expect(result.data.rules['complexity']?.cognitive).toBe(15);
-    }
-  });
-
-  it('accepts complexity rule with custom thresholds', () => {
-    const config = {
-      rules: {
-        'complexity': {
-          severity: 'error',
-          cyclomatic: 20,
-          cognitive: 30,
-        },
-      },
-    };
-
-    const result = ConfigSchema.safeParse(config);
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.rules['complexity']?.cyclomatic).toBe(20);
-      expect(result.data.rules['complexity']?.cognitive).toBe(30);
-    }
-  });
-
-  it('accepts complexity rule with module overrides', () => {
-    const config = {
-      rules: {
-        'complexity': {
-          overrides: {
-            '@utils': { cyclomatic: 5 },
-            '@legacy': { cyclomatic: 25, cognitive: 40 },
-          },
-        },
-      },
-    };
-
-    const result = ConfigSchema.safeParse(config);
-    expect(result.success).toBe(true);
-  });
-
-  it('rejects complexity rule with invalid severity', () => {
-    const config = {
-      rules: {
-        'complexity': { severity: 'fatal' },
-      },
     };
 
     const result = ConfigSchema.safeParse(config);
@@ -176,6 +86,64 @@ describe('ConfigSchema', () => {
     }
   });
 
+  it('accepts module-boundaries rule with full config', () => {
+    const config = {
+      rules: {
+        'module-boundaries': {
+          severity: 'error',
+          modules: {
+            '@features': 'src/features/*',
+            '@shared': 'src/shared/*',
+          },
+          rules: [
+            { from: '@features', to: '@features', allow: false, message: 'No cross-feature imports' },
+            { from: '@features', to: '@shared', allow: true },
+          ],
+        },
+      },
+    };
+
+    const result = ConfigSchema.safeParse(config);
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts layer-violations rule with full config', () => {
+    const config = {
+      rules: {
+        'layer-violations': {
+          severity: 'error',
+          layers: [
+            { name: 'ui', pattern: 'src/ui/**' },
+            { name: 'services', pattern: 'src/services/**' },
+            { name: 'data', pattern: 'src/data/**' },
+          ],
+          allowed: [
+            { from: 'ui', to: ['services'] },
+            { from: 'services', to: ['data'] },
+          ],
+        },
+      },
+    };
+
+    const result = ConfigSchema.safeParse(config);
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts public-api-only rule with config', () => {
+    const config = {
+      rules: {
+        'public-api-only': {
+          severity: 'warn',
+          modules: ['src/features/*', 'src/shared/*'],
+          exceptions: ['*.test.ts', '*.spec.ts'],
+        },
+      },
+    };
+
+    const result = ConfigSchema.safeParse(config);
+    expect(result.success).toBe(true);
+  });
+
   // Error handling tests
   describe('error handling', () => {
     it('rejects config with wrong type for project.include', () => {
@@ -193,61 +161,6 @@ describe('ConfigSchema', () => {
       const config = {
         project: {
           exclude: 'node_modules', // should be array
-        },
-      };
-
-      const result = ConfigSchema.safeParse(config);
-      expect(result.success).toBe(false);
-    });
-
-    it('accepts any string for naming-convention case styles (validated at runtime)', () => {
-      const config = {
-        rules: {
-          'naming-convention': {
-            files: 'custom-style',
-          },
-        },
-      };
-
-      // Schema accepts any string; actual style validation happens at runtime
-      const result = ConfigSchema.safeParse(config);
-      expect(result.success).toBe(true);
-    });
-
-    it('accepts any number for line limit (no min/max constraint in schema)', () => {
-      const config = {
-        rules: {
-          'line-limits': {
-            default: -10,
-          },
-        },
-      };
-
-      // Schema accepts any number
-      const result = ConfigSchema.safeParse(config);
-      expect(result.success).toBe(true);
-    });
-
-    it('accepts float for complexity threshold', () => {
-      const config = {
-        rules: {
-          complexity: {
-            cyclomatic: 10.5,
-          },
-        },
-      };
-
-      // Schema uses z.number() which accepts floats
-      const result = ConfigSchema.safeParse(config);
-      expect(result.success).toBe(true);
-    });
-
-    it('rejects string where number is expected', () => {
-      const config = {
-        rules: {
-          'line-limits': {
-            default: 'one hundred',
-          },
         },
       };
 

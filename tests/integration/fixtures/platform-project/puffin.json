@@ -1,1 +1,1 @@
-{"rules":{"line-limits":{"default":100}}}
+{"rules":{"circular-dependencies":{"severity":"warn"}}}

@@ -3,10 +3,8 @@
     "include": ["src/**/*"]
   },
   "rules": {
-    "naming-convention": {
-      "severity": "warn",
-      "files": "kebab-case",
-      "variables": "camelCase"
+    "circular-dependencies": {
+      "severity": "warn"
     }
   }
 }

@@ -18,13 +18,9 @@ test('reports violations and exits with code 1 for a project with errors', () =>
 
   expect(result.status).toBe(1);
 
-  // All three rules should report issues
-  expect(output).toContain('naming-convention');
-  expect(output).toContain('line-limits');
-  expect(output).toContain('dead-code');
-
-  // The violating file should appear in the output
-  expect(output).toContain('BadCode.ts');
+  // Architectural rules should report issues
+  expect(output).toContain('circular-dependencies');
+  expect(output).toContain('module-boundaries');
 
   // Should indicate scan failure
   expect(output).toContain('Scan failed');

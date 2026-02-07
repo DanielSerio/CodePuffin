@@ -3,24 +3,21 @@ import { ConfigSchema, Config } from './config';
 import { Scanner } from './scanner';
 import { Runner } from './runner';
 import { RuleResult } from './rules';
-import { LineLimitsRule } from '../rules/line-limits';
-import { NamingConventionRule } from '../rules/naming-convention';
-import { DeadCodeRule } from '../rules/dead-code';
-import { ComplexityRule } from '../rules/complexity';
 import { CircularDependenciesRule } from '../rules/circular-dependencies';
-import { NoAnyRule } from '../rules/no-any';
-import { NoEnumRule } from '../rules/no-enum';
+import { ModuleBoundariesRule } from '../rules/module-boundaries';
+import { LayerViolationsRule } from '../rules/layer-violations';
+import { PublicApiOnlyRule } from '../rules/public-api-only';
 
 // Create a runner populated with all rules enabled in the config
 export function createRunner(config: Config): Runner {
   const runner = new Runner();
-  if (config.rules?.['line-limits']) runner.addRule(new LineLimitsRule());
-  if (config.rules?.['naming-convention']) runner.addRule(new NamingConventionRule());
-  if (config.rules?.['dead-code']) runner.addRule(new DeadCodeRule());
-  if (config.rules?.['complexity']) runner.addRule(new ComplexityRule());
+
+  // Architectural rules
   if (config.rules?.['circular-dependencies']) runner.addRule(new CircularDependenciesRule());
-  if (config.rules?.['no-any']) runner.addRule(new NoAnyRule());
-  if (config.rules?.['no-enum']) runner.addRule(new NoEnumRule());
+  if (config.rules?.['module-boundaries']) runner.addRule(new ModuleBoundariesRule());
+  if (config.rules?.['layer-violations']) runner.addRule(new LayerViolationsRule());
+  if (config.rules?.['public-api-only']) runner.addRule(new PublicApiOnlyRule());
+
   return runner;
 }
 
@@ -34,8 +31,9 @@ export function loadConfig(configPath: string):
     if (existsSync(configPath)) {
       raw = JSON.parse(readFileSync(configPath, 'utf-8'));
     }
-  } catch (err: any) {
-    return { success: false, error: `Failed to load config file: ${err.message}` };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    return { success: false, error: `Failed to load config file: ${message}` };
   }
   const result = ConfigSchema.safeParse(raw);
   if (!result.success) {

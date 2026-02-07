@@ -18,8 +18,8 @@ test('vite build reports codepuffin scan results as warnings', () => {
   // Plugin should print scan results header
   expect(output).toContain('CodePuffin');
 
-  // Naming violations should be reported
-  expect(output).toContain('naming-convention');
+  // Circular dependency violations should be reported
+  expect(output).toContain('circular-dependencies');
 
   // Build should complete successfully (warnings don't fail the build)
   expect(result.status).toBe(0);

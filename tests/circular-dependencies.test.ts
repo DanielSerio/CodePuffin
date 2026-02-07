@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
-import { detectCycles, resolveImport, buildImportGraph } from '../src/rules/circular-dependencies';
+import { detectCycles, buildImportGraph } from '../src/rules/circular-dependencies';
+import { resolveImport } from '../src/utils/imports';
 import * as fs from 'fs';
 import path from 'path';
 
