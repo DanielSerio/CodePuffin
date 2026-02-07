@@ -19,6 +19,8 @@ describe('LayerViolationsRule', () => {
     const context: ScanContext = {
       root: '/root',
       files: ['/root/src/ui/Component.tsx', '/root/src/data/Repo.ts'],
+      allFiles: ['/root/src/ui/Component.tsx', '/root/src/data/Repo.ts'],
+      dirtyFiles: [],
       modules: {},
       config: {
         modules: {
@@ -66,6 +68,8 @@ describe('LayerViolationsRule', () => {
     const context: ScanContext = {
       root: '/root',
       files: ['/root/src/ui/A.tsx', '/root/src/ui/B.tsx'],
+      allFiles: ['/root/src/ui/A.tsx', '/root/src/ui/B.tsx'],
+      dirtyFiles: [],
       modules: {},
       config: {
         modules: { 'ui': 'src/ui/**' },

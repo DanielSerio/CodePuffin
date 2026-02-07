@@ -9,7 +9,9 @@ function createMockContext(files: string[] = []): ScanContext {
     root: '/test',
     config: ConfigSchema.parse({}),
     files,
+    allFiles: files,
     modules: {},
+    dirtyFiles: files,
   };
 }
 

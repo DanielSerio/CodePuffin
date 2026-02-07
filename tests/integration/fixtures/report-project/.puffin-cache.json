@@ -1,0 +1,31 @@
+{
+  "version": "2.1.0",
+  "configHash": "7ec78a82c5aa5549a64907750c31136c52f6d2a0e22392bfc341ed0500b4a0a3",
+  "files": {
+    "src/helper.ts": {
+      "hash": "35d354e9040d3d1e7c756a0b2d3107f4c3fa9e20f7f20db1a752c6a9b777730d",
+      "mtime": 1770413411982.485,
+      "imports": [
+        "src/main.ts"
+      ]
+    },
+    "src/main.ts": {
+      "hash": "86cc433cc112f964463a090d142b6c3cf9066d1d6b715cc309f7beb0daf9d29f",
+      "mtime": 1770413410036.8994,
+      "imports": [
+        "src/helper.ts"
+      ]
+    }
+  },
+  "results": {
+    "src/helper.ts": [
+      {
+        "ruleId": "circular-dependencies",
+        "file": "src/helper.ts",
+        "message": "Circular dependency detected: src/helper.ts -> src/main.ts -> src/helper.ts",
+        "severity": "warn",
+        "suggestion": "Break the cycle by extracting shared code into a separate module or using dependency injection"
+      }
+    ]
+  }
+}

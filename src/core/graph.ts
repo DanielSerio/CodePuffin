@@ -16,7 +16,7 @@ export interface ModuleEdge {
 export function buildModuleGraph(context: ScanContext): ModuleEdge[] {
   const edges: ModuleEdge[] = [];
   const edgeKeys = new Set<string>();
-  const knownFiles = new Set(context.files.map(f => f.replace(/\\/g, '/')));
+  const knownFiles = new Set(context.allFiles.map(f => f.replace(/\\/g, '/')));
 
   const globalModules = context.config.modules || {};
   if (Object.keys(globalModules).length === 0) return [];

@@ -14,7 +14,7 @@ By leveraging the **TypeScript Compiler API**, CodePuffin provides deep, determi
 
 - **🏗️ Architecturally Aware**: Move beyond simple linting. Enforce modular boundaries, layer-specific standards (UI vs. Data Layer), and Public API surfaces that traditional tools ignore.
 - **🤖 Agent-Optimized**: Generates high-fidelity markdown reports specifically structured for AI coding assistants, enabling autonomous architectural compliance.
-- **🚀 Blazing Fast**: Near-instant AST analysis. It's not just a checker; it's a real-time architectural guardrail that runs at the speed of thought.
+- **🚀 Blazing Fast**: Near-instant AST analysis with incremental scanning — only changed files and their dependents are re-analyzed.
 - **🔒 Privacy-First**: 100% local. Your intellectual property never leaves your machine. No tokens, no hallucinations, just pure logic.
 
 ---
@@ -51,6 +51,9 @@ puffin scan
 
 # scan with custom config
 puffin scan --config puffin.json
+
+# force a full re-scan (ignore cached results)
+puffin scan --clean
 ```
 
 ### Framework Plugins
@@ -139,6 +142,7 @@ CodePuffin uses `puffin.json` to define your architectural manifest. All named p
 ├── examples/            # Example apps for testing
 ├── tests/               # Unit and integration tests
 ├── puffin.json          # Your architectural manifest
+├── .puffin-cache.json   # Auto-generated incremental scan cache (add to .gitignore)
 └── README.md            # You are here
 ```
 
@@ -159,6 +163,16 @@ CodePuffin uses `puffin.json` to define your architectural manifest. All named p
 - **Layered Integrity**: Enforce top-down dependency flow (Clean/Hexagonal).
 - **Public API Guards**: Protect internal module implementation details.
 - **Circular Insight**: Detect and break tight coupling cycles.
+
+### Incremental Scanning
+
+CodePuffin automatically caches scan results in `.puffin-cache.json` and only re-analyzes files that have changed since the last run. This reduces scan time from **O(N)** to **O(D + A)** (D = modified files, A = affected dependents).
+
+- **Content hashing**: Files are skipped if their content hash hasn't changed (with mtime fast-path).
+- **Blast radius**: When a file changes, its direct importers are automatically re-analyzed too.
+- **Result merging**: Fresh results for dirty files are merged with cached results for clean files.
+- **Config change detection**: Cached results are automatically invalidated when rule configuration changes in `puffin.json`.
+- **`--clean` flag**: Force a full re-scan when needed.
 
 ### 📊 Reporting
 

@@ -11,7 +11,8 @@ export function buildImportGraph(
   context: ScanContext,
 ): Map<string, Set<string>> {
   const graph = new Map<string, Set<string>>();
-  const knownFiles = new Set(files.map(f => f.replace(/\\/g, '/')));
+  // Use allFiles for import resolution so graph edges resolve correctly even in incremental mode
+  const knownFiles = new Set(context.allFiles.map(f => f.replace(/\\/g, '/')));
 
   for (const filePath of files) {
     const normalizedPath = filePath.replace(/\\/g, '/');

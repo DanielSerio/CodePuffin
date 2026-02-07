@@ -1,0 +1,17 @@
+{
+  "version": "2.1.0",
+  "configHash": "7ec78a82c5aa5549a64907750c31136c52f6d2a0e22392bfc341ed0500b4a0a3",
+  "files": {
+    "src/file with spaces.ts": {
+      "hash": "e6dc6f7e13317a5909bba311578639b18c2b646f947ba1f33557cc2caba3195d",
+      "mtime": 1770408711285.7578,
+      "imports": []
+    },
+    "src/🚀-puffin.ts": {
+      "hash": "127be96e1a7e5ddf5ead5c2c2032e65c91568f453c8f527ce79203d3b1950d7f",
+      "mtime": 1770408707185.7603,
+      "imports": []
+    }
+  },
+  "results": {}
+}

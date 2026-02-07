@@ -1,6 +1,8 @@
 import fg from 'fast-glob';
 import path from 'path';
 import { Config } from './config';
+import { CacheService } from './cache';
+import { extractImports, resolveImport } from '../utils/imports';
 
 // Only scan text-based source files; skip binaries, images, fonts, etc.
 const SOURCE_EXTENSIONS = new Set([
@@ -18,18 +20,22 @@ export function isSourceFile(filePath: string): boolean {
 export interface ScanContext {
   root: string;
   config: Config;
-  files: string[];
+  files: string[];       // Files to analyze (dirty files in incremental mode, all files in full mode)
+  allFiles: string[];    // All discovered project files (always the full set, for import resolution)
   modules: Record<string, string[]>;
+  dirtyFiles: string[];  // Files that have changed (or been affected by changes) since the last scan
 }
 
 export class Scanner {
   private root: string;
   private config: Config;
+  private cache: CacheService;
 
   constructor(root: string, config: Config) {
     // Normalize root to forward slashes to match discovered file paths
     this.root = path.resolve(root).replace(/\\/g, '/');
     this.config = config;
+    this.cache = new CacheService(this.root);
   }
 
   async createContext(): Promise<ScanContext> {
@@ -56,6 +62,7 @@ export class Scanner {
     });
     // Normalize discovered files to use forward slashes internally
     const files = allFiles.map(f => f.replace(/\\/g, '/')).filter(isSourceFile);
+    const knownFiles = new Set(files);
 
     // 2. Resolve modules
     const modules: Record<string, string[]> = {};
@@ -77,12 +84,50 @@ export class Scanner {
       }
     }
 
+    // 3. Detect direct dirty files
+    const directDirty: string[] = [];
+    for (const f of files) {
+      if (this.cache.isDirty(f)) {
+        directDirty.push(f);
+      }
+    }
+
+    // 4. Resolve blast radius (dependents of dirty files)
+    const dirtyFiles = this.cache.getDirtyWithDependents(directDirty);
+
+    // 5. Update imports for dirty files
+    await Promise.all(directDirty.map(async (f) => {
+      try {
+        const rawImports = extractImports(f, this.root);
+        const resolved = rawImports.map(i => resolveImport(
+          i.specifier,
+          f,
+          knownFiles,
+          this.root,
+          this.config.project?.aliases
+        )).filter((r): r is string => !!r);
+
+        this.cache.updateImports(f, resolved);
+      } catch (e) {
+        // Skip files that fail to parse
+      }
+    }));
+
+    this.cache.prune(files);
+    this.cache.pruneResults(files);
+    this.cache.saveCache();
+
     return {
       root: this.root,
       config: this.config,
       files,
+      allFiles: files,
       modules,
+      dirtyFiles,
     };
   }
 
+  getCacheService(): CacheService {
+    return this.cache;
+  }
 }

@@ -19,6 +19,8 @@ describe('ModuleBoundariesRule', () => {
     const context: ScanContext = {
       root: '/root',
       files: ['/root/src/features/A/service.ts', '/root/src/features/B/service.ts'],
+      allFiles: ['/root/src/features/A/service.ts', '/root/src/features/B/service.ts'],
+      dirtyFiles: [],
       modules: {},
       config: {
         modules: {
@@ -60,6 +62,8 @@ describe('ModuleBoundariesRule', () => {
     const context: ScanContext = {
       root: '/root',
       files: ['/root/src/features/A/service.ts', '/root/src/shared/util.ts'],
+      allFiles: ['/root/src/features/A/service.ts', '/root/src/shared/util.ts'],
+      dirtyFiles: [],
       modules: {},
       config: {
         modules: {
